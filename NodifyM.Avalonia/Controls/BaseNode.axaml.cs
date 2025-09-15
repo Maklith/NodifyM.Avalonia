@@ -22,16 +22,27 @@ public class BaseNode : ContentControl
     public static readonly AvaloniaProperty<bool> IsSelectedProperty =
         AvaloniaProperty.Register<BaseNode, bool>(nameof(IsSelected));
 
+
+    private NodifyEditor? _editor;
+
+
+    private double _startOffsetX;
+    private double _startOffsetY;
+
+    /// <summary>
+    /// 标记是否先启动了拖动
+    /// </summary>
+    private bool isDragging = false;
+
+    /// <summary>
+    /// 记录上一次鼠标位置
+    /// </summary>
+    private Point lastMousePosition;
+
     public bool IsSelected
     {
         get => (bool)GetValue(IsSelectedProperty);
         set => SetValue(IsSelectedProperty, value);
-    }
-
-    public event NodeLocationEventHandler LocationChanged
-    {
-        add => AddHandler(LocationChangedEvent, value);
-        remove => RemoveHandler(LocationChangedEvent, value);
     }
 
     public Point Location
@@ -40,10 +51,21 @@ public class BaseNode : ContentControl
         set => SetValue(LocationProperty, value);
     }
 
+    public event NodeLocationEventHandler LocationChanged
+    {
+        add => AddHandler(LocationChangedEvent, value);
+        remove => RemoveHandler(LocationChangedEvent, value);
+    }
+
 
     protected override void OnPointerReleased(PointerReleasedEventArgs e)
     {
         base.OnPointerReleased(e);
+        if (_editor is null)
+        {
+            return;
+        }
+
         if (e.Handled)
         {
             return;
@@ -63,8 +85,12 @@ public class BaseNode : ContentControl
 
     protected override void OnPointerPressed(PointerPressedEventArgs e)
     {
-       // base.OnPointerPressed(e);
-        
+        base.OnPointerPressed(e);
+        if (_editor is null)
+        {
+            return;
+        }
+
         if (e.Handled)
         {
             return;
@@ -76,7 +102,8 @@ public class BaseNode : ContentControl
             {
                 return;
             }
-            if (control.GetParentOfType<ComboBox>()is not null)
+
+            if (control.GetParentOfType<ComboBox>() is not null)
             {
                 return;
             }
@@ -99,7 +126,12 @@ public class BaseNode : ContentControl
 
     protected override void OnPointerMoved(PointerEventArgs e)
     {
-        
+        base.OnPointerMoved(e);
+        if (_editor is null)
+        {
+            return;
+        }
+
         if (e.Handled)
         {
             return;
@@ -132,7 +164,7 @@ public class BaseNode : ContentControl
     {
         base.OnApplyTemplate(e);
         _editor = this.GetParentOfType<NodifyEditor>();
-        _editor.NodifyAutoPanning += NodifyAutoPanningEvent;
+        if (_editor != null) _editor.NodifyAutoPanning += NodifyAutoPanningEvent;
     }
 
     private void NodifyAutoPanningEvent(object sender, NodifyAutoPanningEventArgs e)
@@ -146,27 +178,15 @@ public class BaseNode : ContentControl
     }
 
 
-    private NodifyEditor _editor;
-
-    /// <summary>
-    /// 记录上一次鼠标位置
-    /// </summary>
-    private Point lastMousePosition;
-
-    /// <summary>
-    /// 标记是否先启动了拖动
-    /// </summary>
-    private bool isDragging = false;
-
-
-    private double _startOffsetX;
-    private double _startOffsetY;
-
-
     protected override void OnPointerCaptureLost(PointerCaptureLostEventArgs e)
     {
         base.OnPointerCaptureLost(e);
+        if (_editor is null)
+        {
+            return;
+        }
+
         RaiseEvent(new NodeLocationEventArgs(Location, this, LocationChangedEvent, true));
-        _editor.ClearAlignmentLine();
+        _editor?.ClearAlignmentLine();
     }
 }
