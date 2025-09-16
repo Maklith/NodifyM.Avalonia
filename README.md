@@ -50,6 +50,14 @@ This project is a refactoring of [Nodify](https://github.com/miroiu/nodify) on t
 #### You can git clone the project and run `NodifyM.Avalonia.Example`
 
 ## Changelog
+
+### 1.0.18
+
+- Allow node to be used outside the `NodifyEditor` (Just for display)
+
+### 1.0.17
+
+- Fixed event handling to avoid duplicate processing of handled pointer events
 ### 1.0.16
 - Optimization No longer forces connector type
 - Fix If the connector is a Combobox can't click to expand it
