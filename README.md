@@ -18,18 +18,23 @@ This project is a refactoring of [Nodify](https://github.com/miroiu/nodify) on t
  - **Supports** 
    - auto align Node
    - display text on Connection
- - **Nonsupport**
-   - None
- - **Will be supported in the future**
    - Select multiple nodes
+ - **Nonsupport**
+     - Minimap
+ - **Will be supported in the future**
+   - 
 ## Usage
 ### NodifyEditor
  - `Press` and `Hold` -> Move the all show items
  -  Mouse wheel -> Zoom all show items
+- Hold `Ctrl` and `Press Move` -> Box select Nodes
 ### Node
- - `Press` and `Hold` -> Move the Node
+
+- `Press Move` and `Hold` -> Move the Node
  - `Press Move` and `Hold Shift` -> Move the Node(without automatically align)
  - `Press` the Node -> Select the Node
+- Hold `Ctrl` and `Click` -> Select or unselect Node
+- Hold `Ctrl` and `Press Move` on the selected Node -> Move all selected Nodes
 ### Connection
  - `Press` and `Hold` the Connector and move to another Connector -> Create a new connection
  - Hold `Alt` and `Click` Connection -> Remove Connection
@@ -51,6 +56,10 @@ This project is a refactoring of [Nodify](https://github.com/miroiu/nodify) on t
 
 ## Changelog
 
+### 1.1.0
+
+- Support box selection and multiple selection
+- Fixed memory leaks
 ### 1.0.18
 
 - Allow node to be used outside the `NodifyEditor` (Just for display)

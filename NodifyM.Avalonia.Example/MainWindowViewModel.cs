@@ -31,7 +31,7 @@ public partial class MainWindowViewModel : NodifyEditorViewModelBase{
                 
                 new NodeViewModelBase()
                 {
-                    Location = new Point(400, 2000),
+                    Location = new Point(400, 200),
                     Title = "Node 1",
                     Input = new ObservableCollection<object>
                     {

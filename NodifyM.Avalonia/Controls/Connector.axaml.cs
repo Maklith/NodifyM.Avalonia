@@ -132,7 +132,7 @@ public class Connector : ContentControl
                 e.GetCurrentPoint(this)
                     .Pointer.Capture(this);
                 e.Handled = true;
-                Editor.SelectItem(this.GetParentOfType<BaseNode>());
+                Editor.SelectItem(this.GetParentOfType<BaseNode>(), e.KeyModifiers.HasFlag(KeyModifiers.Control));
 
                 UpdateAnchor();
                 OnConnectorDragStarted();
@@ -153,6 +153,7 @@ public class Connector : ContentControl
         {
             Vector offset = e.GetPosition(Thumb) - _thumbCenter;
             OnConnectorDrag(offset);
+            e.Handled = true;
         }
     }
 

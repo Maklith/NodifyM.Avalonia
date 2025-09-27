@@ -4,6 +4,7 @@ using Avalonia;
 using Avalonia.Collections;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
+using Avalonia.Controls.Shapes;
 using Avalonia.Controls.Templates;
 using Avalonia.Input;
 using Avalonia.Interactivity;
@@ -39,10 +40,17 @@ public class NodifyEditor : SelectingItemsControl
     public static readonly AvaloniaProperty<IEnumerable> ConnectionsProperty =
         AvaloniaProperty.Register<NodifyEditor, IEnumerable>(nameof(Connections));
 
+    private Rectangle _dragRectangle;
+    private Point _dragRectangleStartPoint;
+
     private double _initHeight;
 
 
     private double _initWeight;
+    private bool _isCreateDragRectangle = false;
+    private bool _isNodeDragging = false;
+    private BaseNode? _lastSelectedNode;
+    private Dictionary<BaseNode, Point> _nodeStartLocation = new();
 
     private double _nowScale = 1;
 
@@ -67,6 +75,7 @@ public class NodifyEditor : SelectingItemsControl
 
     public NodifyEditor()
     {
+        SelectionMode = SelectionMode.Multiple;
         AddHandler(Connector.DisconnectEvent, OnConnectorDisconnected);
         AddHandler(Connector.PendingConnectionStartedEvent, OnConnectionStarted);
         AddHandler(Connector.PendingConnectionCompletedEvent, OnConnectionCompleted);
@@ -112,32 +121,140 @@ public class NodifyEditor : SelectingItemsControl
 
     public static event ZoomChangedEventHandler? ZoomChanged;
 
-    public void SelectItem(BaseNode node)
+    public void SelectItem(BaseNode? node, bool multSelectMode)
     {
         var visual = this.GetChildOfType<Canvas>("NodeItemsPresenter").Children;
-        foreach (var visualChild in visual)
+        if (!multSelectMode)
         {
-            visualChild.ZIndex = 0;
-            if (visualChild.GetChildOfType<BaseNode>() is BaseNode n)
+            foreach (var visualChild in visual)
             {
-                n.IsSelected = false;
+                visualChild.ZIndex = 0;
+                if (visualChild.GetChildOfType<BaseNode>() is BaseNode n)
+                {
+                    n.IsSelected = false;
+                }
+            }
+
+            SelectedItems.Clear();
+        }
+
+        if (node == null)
+        {
+            return;
+        }
+
+        if (!SelectedItems!.Contains(node))
+        {
+            SelectedItems.Add(node);
+            node.IsSelected = true;
+            node.GetVisualParent().ZIndex = 1;
+            _lastSelectedNode = null;
+        }
+        else
+        {
+            _lastSelectedNode = node;
+        }
+    }
+
+    public IEnumerable<BaseNode> GetSelectedNode()
+    {
+        if (SelectedItems == null) yield break;
+        foreach (var selectedItem in SelectedItems)
+        {
+            if (selectedItem is BaseNode node)
+            {
+                yield return node;
+            }
+        }
+    }
+
+    public void StartNodeDrag(PointerPressedEventArgs e, BaseNode node)
+    {
+        if (e.Source is Control control)
+        {
+            if (control is ComboBox)
+            {
+                return;
+            }
+
+            if (control.GetParentOfType<ComboBox>() is not null)
+            {
+                return;
             }
         }
 
-        node.IsSelected = true;
-        node.GetVisualParent().ZIndex = 1;
-        SelectedItem = node.DataContext;
+        SelectItem(node, e.KeyModifiers.HasFlag(KeyModifiers.Control));
+        if (!e.GetCurrentPoint(this)
+                .Properties.IsLeftButtonPressed) return;
+        e.GetCurrentPoint(this).Pointer.Capture(this);
+        // 启动拖动
+        _isNodeDragging = true;
+        _nodeStartLocation.Clear();
+        foreach (var selectedNode in GetSelectedNode())
+        {
+            _nodeStartLocation[selectedNode] = selectedNode.Location;
+        }
+
+        lastMousePosition = e.GetPosition(this);
+        _startOffsetX = OffsetX;
+        _startOffsetY = OffsetY;
+        e.Handled = true;
     }
 
+    public void StopNodeDrag(PointerReleasedEventArgs e)
+    {
+        if (!_isNodeDragging) return;
+        // 停止拖动
+        _isNodeDragging = false;
+        e.Handled = true;
+        // 停止计时器
+        AutoPanningTimer.Stop();
+        ClearAlignmentLine();
+
+        if (_lastSelectedNode != null && e.KeyModifiers.HasFlag(KeyModifiers.Control) &&
+            e.GetPosition(this) - lastMousePosition == new Point(0, 0))
+        {
+            _lastSelectedNode.IsSelected = false;
+            SelectedItems.Remove(_lastSelectedNode);
+            _lastSelectedNode.GetVisualParent().ZIndex = 0;
+        }
+    }
+
+    public void NodeDragging(PointerEventArgs e)
+    {
+        // 如果没有启动拖动，则不执行
+        if (!_isNodeDragging) return;
+        if (!AutoPanningTimer.IsEnabled)
+        {
+            AutoPanningTimer.Start();
+        }
+
+        var currentMousePosition = e.GetPosition(this);
+        var offset = currentMousePosition - lastMousePosition;
+        foreach (var node in GetSelectedNode())
+        {
+            var (x, y) = _nodeStartLocation[node];
+            var nodeLocation = new Point((offset.X + x) + (_startOffsetX - OffsetX),
+                offset.Y + y + (_startOffsetY - OffsetY));
+            if (e.KeyModifiers.HasFlag(KeyModifiers.Shift))
+            {
+                ClearAlignmentLine();
+
+                node.Location = nodeLocation;
+            }
+            else
+                node.Location = TryAlignNode(node, nodeLocation);
+        }
+
+
+        e.Handled = true;
+    }
 
     protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
     {
         base.OnApplyTemplate(e);
         if (Parent != null) ((Control)Parent).SizeChanged += (OnSizeChanged);
-        PointerReleased += OnPointerReleased;
-        PointerWheelChanged += OnPointerWheelChanged;
-        PointerPressed += OnPointerPressed;
-        PointerMoved += OnPointerMoved;
+
         var renderTransform = new TransformGroup();
         var scaleTransform = new ScaleTransform(Zoom, Zoom);
         ScaleTransform = scaleTransform;
@@ -202,16 +319,14 @@ public class NodifyEditor : SelectingItemsControl
         _nowScale = Zoom;
         Width = _initWeight / Zoom;
         Height = _initHeight / Zoom;
+        _dragRectangle = this.GetChildOfType<Rectangle>("SelectionRent")!;
     }
 
     protected override void OnUnloaded(RoutedEventArgs e)
     {
         base.OnUnloaded(e);
         if (Parent != null) ((Control)Parent).SizeChanged -= (OnSizeChanged);
-        PointerReleased -= OnPointerReleased;
-        PointerWheelChanged -= OnPointerWheelChanged;
-        PointerPressed -= OnPointerPressed;
-        PointerMoved -= OnPointerMoved;
+
         RemoveHandler(Connector.DisconnectEvent, OnConnectorDisconnected);
         RemoveHandler(Connector.PendingConnectionStartedEvent, OnConnectionStarted);
         RemoveHandler(Connector.PendingConnectionCompletedEvent, OnConnectionCompleted);
@@ -219,21 +334,39 @@ public class NodifyEditor : SelectingItemsControl
         RemoveHandler(BaseConnection.DisconnectEvent, OnRemoveConnection);
     }
 
-    private void OnPointerPressed(object? sender, PointerPressedEventArgs e)
+    protected override void OnPointerCaptureLost(PointerCaptureLostEventArgs e)
     {
+        base.OnPointerCaptureLost(e);
+        SelectionMode = SelectionMode.Single;
+        if (!isDragging) return;
+        // 停止拖动
+        isDragging = false;
+        e.Handled = true;
+        // 停止计时器
+        AutoPanningTimer.Stop();
+    }
+
+    protected override void OnPointerPressed(PointerPressedEventArgs e)
+    {
+        base.OnPointerPressed(e);
         if (e.Handled)
         {
             return;
         }
 
-        var visual = ((Control)sender).GetLogicalChildren();
-        foreach (var visualChild in visual)
+        SelectItem(null, false);
+        if (e.KeyModifiers.HasFlag(KeyModifiers.Control))
         {
-            if (visualChild.GetLogicalChildren().First() is Node n)
-            {
-                n.IsSelected = false;
-            }
+            _dragRectangle.IsVisible = true;
+            _dragRectangle.SetValue(Canvas.LeftProperty, e.GetPosition(this).X);
+            _dragRectangle.SetValue(Canvas.TopProperty, e.GetPosition(this).Y);
+            _dragRectangle.Width = 0;
+            _dragRectangle.Height = 0;
+            _dragRectangleStartPoint = e.GetPosition(this);
+            _isCreateDragRectangle = true;
+            return;
         }
+
 
         SelectedItem = null;
         if (!e.GetCurrentPoint(this).Properties.IsLeftButtonPressed) return;
@@ -244,26 +377,73 @@ public class NodifyEditor : SelectingItemsControl
         e.Handled = true;
     }
 
-    private void OnPointerReleased(object? sender, PointerReleasedEventArgs e)
+    protected override void OnPointerReleased(PointerReleasedEventArgs e)
     {
+        base.OnPointerReleased(e);
+        if (_isNodeDragging)
+        {
+            StopNodeDrag(e);
+        }
+
+        if (_isCreateDragRectangle)
+        {
+            //获取选中区域内的节点
+            var rect = new Rect(Canvas.GetLeft(_dragRectangle) - OffsetX, Canvas.GetTop(_dragRectangle) - OffsetY,
+                _dragRectangle.Width,
+                _dragRectangle.Height);
+            var visual = this.GetLogicalChildren();
+            foreach (var visualChild in visual)
+            {
+                if (visualChild.GetLogicalChildren().First() is BaseNode n)
+                {
+                    var nodeRect = new Rect(n.Location, n.Bounds.Size);
+                    if (rect.Intersects(nodeRect))
+                    {
+                        SelectItem(n, true);
+                    }
+                }
+            }
+
+            _dragRectangle.IsVisible = false;
+            _isCreateDragRectangle = false;
+        }
+
         if (!isDragging) return;
         // 停止拖动
         isDragging = false;
         e.Handled = true;
         // 停止计时器
         AutoPanningTimer.Stop();
-        // var currentPoint = e.GetCurrentPoint(this);
-        //  Debug.WriteLine($"停止拖动坐标X:{OffsetX} Y:{OffsetY}");
     }
 
-    private void OnPointerMoved(object? sender, PointerEventArgs e)
+    protected override void OnPointerMoved(PointerEventArgs e)
     {
+        base.OnPointerMoved(e);
         if (e.Handled)
         {
             return;
         }
 
+        if (_isCreateDragRectangle)
+        {
+            var point = e.GetPosition(this);
+            var x = Math.Min(point.X, _dragRectangleStartPoint.X);
+            var y = Math.Min(point.Y, _dragRectangleStartPoint.Y);
+            var w = Math.Abs(point.X - _dragRectangleStartPoint.X);
+            var h = Math.Abs(point.Y - _dragRectangleStartPoint.Y);
+            _dragRectangle.SetValue(Canvas.LeftProperty, x);
+            _dragRectangle.SetValue(Canvas.TopProperty, y);
+            _dragRectangle.Width = w;
+            _dragRectangle.Height = h;
+            e.Handled = true;
+            return;
+        }
+
         if (!e.GetCurrentPoint(this).Properties.IsLeftButtonPressed) return;
+        if (_isNodeDragging)
+        {
+            NodeDragging(e);
+        }
 
         // 如果没有启动拖动，则不执行
         if (!isDragging) return;
@@ -279,19 +459,17 @@ public class NodifyEditor : SelectingItemsControl
         ViewTranslateTransform.Y = OffsetY;
     }
 
-    private void OnSizeChanged(object? sender, SizeChangedEventArgs e)
+    protected override void OnPointerWheelChanged(PointerWheelEventArgs e)
     {
-        _initWeight = e.NewSize.Width;
-        _initHeight = e.NewSize.Height;
-        Width = _initWeight / Zoom;
-        Height = _initHeight / Zoom;
-        e.Handled = true;
-    }
+        base.OnPointerWheelChanged(e);
+        if (e.Handled)
+        {
+            return;
+        }
 
-    private void OnPointerWheelChanged(object? sender, PointerWheelEventArgs pointerWheelEventArgs)
-    {
-        var position = pointerWheelEventArgs.GetPosition(this);
-        var deltaY = pointerWheelEventArgs.Delta.Y;
+
+        var position = e.GetPosition(this);
+        var deltaY = e.Delta.Y;
         if (deltaY < 0)
         {
             _nowScale *= 0.9d;
@@ -312,8 +490,18 @@ public class NodifyEditor : SelectingItemsControl
         Height = _initHeight / Zoom;
         ScaleTransform.ScaleX = Zoom;
         ScaleTransform.ScaleY = Zoom;
+        ZoomChanged?.Invoke(this,
+            new ZoomChangedEventArgs(ScaleTransform.ScaleX, ScaleTransform.ScaleY, OffsetX, OffsetY));
+        e.Handled = true;
+    }
 
-        pointerWheelEventArgs.Handled = true;
+    private void OnSizeChanged(object? sender, SizeChangedEventArgs e)
+    {
+        _initWeight = e.NewSize.Width;
+        _initHeight = e.NewSize.Height;
+        Width = _initWeight / Zoom;
+        Height = _initHeight / Zoom;
+        e.Handled = true;
     }
 
     #region Cosmetic Dependency Properties
@@ -787,11 +975,6 @@ public class NodifyEditor : SelectingItemsControl
         if (!AutoPanningTimer.IsEnabled)
         {
             AutoPanningTimer.Start();
-        }
-
-        if (e.Stop)
-        {
-            AutoPanningTimer.Stop();
         }
     }
 

@@ -1,0 +1,82 @@
+﻿<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="using:NodifyM.Avalonia.Controls">
+    <Design.PreviewWith>
+        <controls:NodeGroup />
+    </Design.PreviewWith>
+
+    <Style Selector="controls|NodeGroup">
+        <Setter Property="Background">
+            <Setter.Value>
+                <SolidColorBrush Color="#3E3E42"
+                                 Opacity=".5" />
+            </Setter.Value>
+        </Setter>
+        <Setter Property="Foreground"
+                Value="White" />
+        <Setter Property="HeaderBrush">
+            <Setter.Value>
+                <SolidColorBrush Color="#1E1E1E" />
+            </Setter.Value>
+        </Setter>
+        <Setter Property="BorderBrush"
+                Value="Transparent" />
+        <Setter Property="Padding"
+                Value="7 3" />
+        <Setter Property="VerticalAlignment"
+                Value="Center" />
+        <Setter Property="HorizontalAlignment"
+                Value="Center" />
+        <Setter Property="MinHeight"
+                Value="30" />
+        <Setter Property="MinWidth"
+                Value="150" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type controls:NodeGroup}">
+                    <Border BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="3">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"
+                                               MinHeight="30" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+
+                            <Border Background="{TemplateBinding HeaderBrush}"
+                                    Cursor="SizeAll"
+                                    CornerRadius="3 3 0 0"
+                                    x:Name="PART_Header">
+                                <ContentPresenter Content="{TemplateBinding Header}"
+                                                  Margin="{TemplateBinding Padding}" />
+                            </Border>
+
+                            <Grid Grid.Row="1"
+                                  Background="{TemplateBinding Background}">
+                                <ContentPresenter x:Name="PART_Content"
+                                                  Content="{TemplateBinding Content}" />
+                                <Thumb x:Name="PART_ResizeThumb"
+                                       HorizontalAlignment="Right"
+                                       VerticalAlignment="Bottom"
+                                       Margin="0 0 2 2"
+                                       MinHeight="20"
+                                       Cursor="SizeNWSE"
+                                       Foreground="{TemplateBinding Foreground}"
+                                       IsVisible="{TemplateBinding CanResize}">
+                                    <Thumb.Template>
+                                        <ControlTemplate>
+                                            <TextBlock Text="p"
+                                                       FontFamily="Marlett"
+                                                       FontSize="18" />
+                                        </ControlTemplate>
+                                    </Thumb.Template>
+                                </Thumb>
+                            </Grid>
+                        </Grid>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+</Styles>
