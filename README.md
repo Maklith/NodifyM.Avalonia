@@ -1,7 +1,7 @@
 # NodifyM.Avalonia
 [![NuGet](https://img.shields.io/nuget/v/NodifyM.Avalonia?style=for-the-badge&logo=nuget&label=release)](https://www.nuget.org/packages/NodifyM.Avalonia/)
 [![NuGet](https://img.shields.io/nuget/dt/NodifyM.Avalonia?label=downloads&style=for-the-badge&logo=nuget)](https://www.nuget.org/packages/NodifyM.Avalonia)
-[![License](https://img.shields.io/github/license/miroiu/nodify?style=for-the-badge)](https://github.com/miroiu/nodify/blob/master/LICENSE)
+[![License](https://img.shields.io/github/license/Maklith/NodifyM.Avalonia?style=for-the-badge)](https://github.com/Maklith/NodifyM.Avalonia/blob/master/LICENSE)
 
 A collection of controls for node based editors designed for MVVM.
 ## About
