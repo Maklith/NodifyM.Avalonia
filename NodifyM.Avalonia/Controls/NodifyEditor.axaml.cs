@@ -28,6 +28,15 @@ public class NodifyEditor : SelectingItemsControl
     public static readonly AvaloniaProperty<double> ZoomProperty =
         AvaloniaProperty.Register<NodifyEditor, double>(nameof(Zoom), 1d);
 
+    public static readonly StyledProperty<RelativePoint> ZoomCenterProperty = AvaloniaProperty.Register<NodifyEditor, RelativePoint>(
+        nameof(ZoomCenter),new RelativePoint(0.5, 0.5, RelativeUnit.Relative));
+
+    public RelativePoint ZoomCenter
+    {
+        get => GetValue(ZoomCenterProperty);
+        set => SetValue(ZoomCenterProperty, value);
+    }
+
     public static readonly AvaloniaProperty<double> OffsetXProperty =
         AvaloniaProperty.Register<NodifyEditor, double>(nameof(OffsetX), 1d);
 
@@ -81,6 +90,54 @@ public class NodifyEditor : SelectingItemsControl
         AddHandler(Connector.PendingConnectionCompletedEvent, OnConnectionCompleted);
         AddHandler(BaseNode.LocationChangedEvent, OnNodeLocationChanged);
         AddHandler(BaseConnection.DisconnectEvent, OnRemoveConnection);
+        
+    }
+
+    static NodifyEditor()
+    {
+        ZoomProperty.Changed.Subscribe(args =>
+        {
+            if (args.Sender is NodifyEditor nodifyEditor)
+            {
+                if (Math.Abs(nodifyEditor.Zoom - nodifyEditor._nowScale) < double.Epsilon)
+                {
+                    return;
+                }
+
+                var oldZoom = args.OldValue.Value;
+                var newZoom = args.NewValue.Value;
+
+                // 计算缩放中心点的像素坐标（基于当前视口大小）
+                var centerPixels = nodifyEditor.ZoomCenter.ToPixels(
+                    new Size(nodifyEditor.Bounds.Width, nodifyEditor.Bounds.Height));
+
+                // 应用缩放补偿（注意：此时 Zoom 已经被更新为 newZoom）
+                // 使用与鼠标滚轮相同的逻辑，但因为已经缩放，所以直接使用 oldZoom 和 newZoom
+                nodifyEditor.OffsetX += (oldZoom - newZoom) * centerPixels.X / oldZoom;
+                nodifyEditor.ViewTranslateTransform.X = nodifyEditor.OffsetX;
+                nodifyEditor.OffsetY += (oldZoom - newZoom) * centerPixels.Y / oldZoom;
+                nodifyEditor.ViewTranslateTransform.Y = nodifyEditor.OffsetY;
+
+                // 更新缩放变换
+                nodifyEditor.ScaleTransform.ScaleX = newZoom;
+                nodifyEditor.ScaleTransform.ScaleY = newZoom;
+
+                // 更新属性
+                nodifyEditor.Zoom = newZoom;
+                nodifyEditor._nowScale = newZoom;
+                nodifyEditor.Width = nodifyEditor._initWeight / newZoom;
+                nodifyEditor.Height = nodifyEditor._initHeight / newZoom;
+
+                ZoomChanged?.Invoke(nodifyEditor,
+                    new ZoomChangedEventArgs(newZoom, newZoom,
+                        nodifyEditor.OffsetX, nodifyEditor.OffsetY));
+            }
+        });
+
+
+        
+
+
     }
 
     public object PendingConnection
@@ -480,7 +537,7 @@ public class NodifyEditor : SelectingItemsControl
             _nowScale *= 1.1d;
             _nowScale = Math.Min(10d, _nowScale);
         }
-
+        
         OffsetX += (Zoom - _nowScale) * position.X / _nowScale;
         ViewTranslateTransform.X = OffsetX;
         OffsetY += (Zoom - _nowScale) * position.Y / _nowScale;
