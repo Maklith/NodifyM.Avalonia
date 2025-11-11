@@ -55,65 +55,13 @@ This project is a refactoring of [Nodify](https://github.com/miroiu/nodify) on t
 #### You can git clone the project and run `NodifyM.Avalonia.Example`
 
 ## Changelog
+### 1.1.1
 
+- Fix Zoom property only binds one-way
+- Add ZoomCenter property
 ### 1.1.0
 
 - Support box selection and multiple selection
 - Fixed memory leaks
-### 1.0.18
 
-- Allow node to be used outside the `NodifyEditor` (Just for display)
-
-### 1.0.17
-
-- Fixed event handling to avoid duplicate processing of handled pointer events
-### 1.0.16
-- Optimization No longer forces connector type
-- Fix If the connector is a Combobox can't click to expand it
-
-### 1.0.15
-
-- Fix OnPointerPressed event handler
-
-### 1.0.14
-
-- Remove unnecessary packages
-### 1.0.13
-- Fixed SelectedNode Property
-- Added the ability to select and drag the Node corresponding to the Connector
-### 1.0.12
-- Fixed the adaptive node layout calculation error
-- Added node centerline alignment
-### 1.0.11
-- Added automatic adaptation to display all Nodes when NodifyEditor is initialized
-- Optimize child node search
-### 1.0.10
-- Fixed Node Header/Input/OutputTemplate allow use IDataTemplate
-- Added Avalonia.Diagnostics Condition
-### 1.0.9
-- Allows not to use the built-in ViewModelBase
-- Fixed ViewTranslateTransform and AlignmentLine exceptions when multiple NodifyEditor
-### 1.0.8
-- Added Light and Dark themes follow the Avalonia toggle
-- Fixed invalid Connection Text Brush modifications
-- Optimize the Dark theme color
-- Added GridLine color definition
-### 1.0.7
-- Added Node **auto panning** when close to edge
-### 1.0.6
-- Fixed Node IsSelected property
-- Fixed Node BorderBrush Style
-- Added Node Alignment hint
-### 1.0.5
- - Added the ability to temporarily without automatically align Node while holding Shift
- - Added the ability to display text on Connection
-### 1.0.4
- - Add align Node configuration properties
- - Add Node automatic alignment
-### 1.0.3
- - Added the connection SplitConnection and DisconnectConnection commands
- - Add CircuitConnection
- - Fixed default control color to dictionary color
- - Support to override the Connect and Disconnect from NodifyEditorViewModelBase method
- - Fix KnotNode Show
- - Remove some useless attributes
+### ....
