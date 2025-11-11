@@ -526,7 +526,6 @@ public class NodifyEditor : SelectingItemsControl
 
 
         var position = e.GetPosition(this);
-        Console.WriteLine(position);
         var deltaY = e.Delta.Y;
         if (deltaY < 0)
         {
