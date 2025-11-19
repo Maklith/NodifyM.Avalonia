@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Diagnostics.CodeAnalysis;
 using System.Windows.Input;
 using Avalonia;
 using Avalonia.Collections;
@@ -78,9 +79,9 @@ public class NodifyEditor : SelectingItemsControl
     /// <summary>
     /// 记录上一次鼠标位置
     /// </summary>
-    private Point lastMousePosition;
+    private Point _lastMousePosition;
 
-    private ScaleTransform ScaleTransform;
+    private ScaleTransform? _scaleTransform;
 
     public NodifyEditor()
     {
@@ -90,7 +91,31 @@ public class NodifyEditor : SelectingItemsControl
         AddHandler(Connector.PendingConnectionCompletedEvent, OnConnectionCompleted);
         AddHandler(BaseNode.LocationChangedEvent, OnNodeLocationChanged);
         AddHandler(BaseConnection.DisconnectEvent, OnRemoveConnection);
-        
+        EnsureTransformsInitialized();
+    }
+    
+    private void EnsureTransformsInitialized()
+    {
+        if (_scaleTransform == null)
+        {
+            _scaleTransform = new ScaleTransform(Zoom, Zoom);
+        }
+
+        if (RenderTransform is not TransformGroup transformGroup)
+        {
+            transformGroup = new TransformGroup();
+            RenderTransform = transformGroup;
+        }
+
+        if (!transformGroup.Children.Contains(_scaleTransform))
+        {
+            transformGroup.Children.Add(_scaleTransform);
+        }
+
+        if (ViewTranslateTransform == null)
+        {
+            ViewTranslateTransform = new TranslateTransform();
+        }
     }
 
     static NodifyEditor()
@@ -106,6 +131,14 @@ public class NodifyEditor : SelectingItemsControl
 
                 var oldZoom = args.OldValue.Value;
                 var newZoom = args.NewValue.Value;
+                if (Math.Abs(oldZoom) < double.Epsilon)
+                {
+                    oldZoom = newZoom;
+                    if (Math.Abs(oldZoom) < double.Epsilon)
+                    {
+                        oldZoom = 1d;
+                    }
+                }
 
                 // 计算缩放中心点的像素坐标（基于当前视口大小）
                 var centerPixels = nodifyEditor.ZoomCenter.ToPixels(
@@ -119,8 +152,8 @@ public class NodifyEditor : SelectingItemsControl
                 nodifyEditor.ViewTranslateTransform.Y = nodifyEditor.OffsetY;
 
                 // 更新缩放变换
-                nodifyEditor.ScaleTransform.ScaleX = newZoom;
-                nodifyEditor.ScaleTransform.ScaleY = newZoom;
+                nodifyEditor._scaleTransform.ScaleX = newZoom;
+                nodifyEditor._scaleTransform.ScaleY = newZoom;
 
                 // 更新属性
                 nodifyEditor.Zoom = newZoom;
@@ -252,7 +285,7 @@ public class NodifyEditor : SelectingItemsControl
             _nodeStartLocation[selectedNode] = selectedNode.Location;
         }
 
-        lastMousePosition = e.GetPosition(this);
+        _lastMousePosition = e.GetPosition(this);
         _startOffsetX = OffsetX;
         _startOffsetY = OffsetY;
         e.Handled = true;
@@ -269,7 +302,7 @@ public class NodifyEditor : SelectingItemsControl
         ClearAlignmentLine();
 
         if (_lastSelectedNode != null && e.KeyModifiers.HasFlag(KeyModifiers.Control) &&
-            e.GetPosition(this) - lastMousePosition == new Point(0, 0))
+            e.GetPosition(this) - _lastMousePosition == new Point(0, 0))
         {
             _lastSelectedNode.IsSelected = false;
             SelectedItems.Remove(_lastSelectedNode);
@@ -287,7 +320,7 @@ public class NodifyEditor : SelectingItemsControl
         }
 
         var currentMousePosition = e.GetPosition(this);
-        var offset = currentMousePosition - lastMousePosition;
+        var offset = currentMousePosition - _lastMousePosition;
         foreach (var node in GetSelectedNode())
         {
             var (x, y) = _nodeStartLocation[node];
@@ -310,69 +343,69 @@ public class NodifyEditor : SelectingItemsControl
     protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
     {
         base.OnApplyTemplate(e);
+        EnsureTransformsInitialized();
         if (Parent != null) ((Control)Parent).SizeChanged += (OnSizeChanged);
 
-        var renderTransform = new TransformGroup();
-        var scaleTransform = new ScaleTransform(Zoom, Zoom);
-        ScaleTransform = scaleTransform;
-        renderTransform.Children.Add(scaleTransform);
-        RenderTransform = renderTransform;
-        AutoPanningTimer =
-            new DispatcherTimer(TimeSpan.FromMilliseconds(10), DispatcherPriority.Normal, HandleAutoPanning);
+        AutoPanningTimer ??= new DispatcherTimer(TimeSpan.FromMilliseconds(10), DispatcherPriority.Normal, HandleAutoPanning);
         AutoPanningTimer.Stop();
 
-        AlignmentLine = new AvaloniaList<object>();
+        AlignmentLine ??= new AvaloniaList<object>();
     }
 
     protected override void OnLoaded(RoutedEventArgs e)
     {
         base.OnLoaded(e);
+        EnsureTransformsInitialized();
         var T = 0.0d;
         var L = 0.0d;
         var B = 0d;
         var R = 0d;
         var childOfType = this.GetChildOfType<Canvas>("NodeItemsPresenter");
-        foreach (var logicalChild in childOfType.GetVisualChildren())
+        if (childOfType != null)
         {
-            var logicalChildLogicalChild = ((BaseNode)logicalChild.GetVisualChildren().First());
-            var location = logicalChildLogicalChild.Location;
-            if (location.Y < T)
+            foreach (var logicalChild in childOfType.GetVisualChildren())
             {
-                T = location.Y;
-            }
+                var logicalChildLogicalChild = ((BaseNode)logicalChild.GetVisualChildren().First());
+                var location = logicalChildLogicalChild.Location;
+                if (location.Y < T)
+                {
+                    T = location.Y;
+                }
 
-            if (location.X < L)
-            {
-                L = location.X;
-            }
+                if (location.X < L)
+                {
+                    L = location.X;
+                }
 
-            if (location.Y + logicalChildLogicalChild.Bounds.Height > B)
-            {
-                B = location.Y + logicalChildLogicalChild.Bounds.Height;
-            }
+                if (location.Y + logicalChildLogicalChild.Bounds.Height > B)
+                {
+                    B = location.Y + logicalChildLogicalChild.Bounds.Height;
+                }
 
-            if (location.X + logicalChildLogicalChild.Bounds.Width > R)
-            {
-                R = location.X + logicalChildLogicalChild.Bounds.Width;
+                if (location.X + logicalChildLogicalChild.Bounds.Width > R)
+                {
+                    R = location.X + logicalChildLogicalChild.Bounds.Width;
+                }
             }
         }
 
-        ViewTranslateTransform = new TranslateTransform(-L, -T);
+        ViewTranslateTransform.X = -L;
+        ViewTranslateTransform.Y = -T;
         OffsetY = -T;
         OffsetX = -L;
-        if (1 / (Math.Abs(T - B) / _initHeight) < ScaleTransform.ScaleY)
+        if (1 / (Math.Abs(T - B) / _initHeight) < _scaleTransform.ScaleY)
         {
-            ScaleTransform.ScaleY = 1 / (Math.Abs(T - B) / _initHeight);
-            ScaleTransform.ScaleX = 1 / (Math.Abs(T - B) / _initHeight);
+            _scaleTransform.ScaleY = 1 / (Math.Abs(T - B) / _initHeight);
+            _scaleTransform.ScaleX = 1 / (Math.Abs(T - B) / _initHeight);
         }
 
-        if (1 / (Math.Abs(L - R) / _initWeight) < ScaleTransform.ScaleY)
+        if (1 / (Math.Abs(L - R) / _initWeight) < _scaleTransform.ScaleY)
         {
-            ScaleTransform.ScaleY = 1 / (Math.Abs(L - R) / _initWeight);
-            ScaleTransform.ScaleX = 1 / (Math.Abs(L - R) / _initWeight);
+            _scaleTransform.ScaleY = 1 / (Math.Abs(L - R) / _initWeight);
+            _scaleTransform.ScaleX = 1 / (Math.Abs(L - R) / _initWeight);
         }
 
-        Zoom = ScaleTransform.ScaleY;
+        Zoom = _scaleTransform.ScaleY;
         _nowScale = Zoom;
         Width = _initWeight / Zoom;
         Height = _initHeight / Zoom;
@@ -428,7 +461,7 @@ public class NodifyEditor : SelectingItemsControl
         SelectedItem = null;
         if (!e.GetCurrentPoint(this).Properties.IsLeftButtonPressed) return;
         isDragging = true;
-        lastMousePosition = e.GetPosition(this);
+        _lastMousePosition = e.GetPosition(this);
         _startOffsetX = OffsetX;
         _startOffsetY = OffsetY;
         e.Handled = true;
@@ -506,7 +539,7 @@ public class NodifyEditor : SelectingItemsControl
         if (!isDragging) return;
 
         var currentMousePosition = e.GetPosition(this);
-        var offset = currentMousePosition - lastMousePosition;
+        var offset = currentMousePosition - _lastMousePosition;
 
         //lastMousePosition = e.GetPosition(this);
         // 记录当前坐标
@@ -545,10 +578,10 @@ public class NodifyEditor : SelectingItemsControl
         Zoom = _nowScale;
         Width = _initWeight / Zoom;
         Height = _initHeight / Zoom;
-        ScaleTransform.ScaleX = Zoom;
-        ScaleTransform.ScaleY = Zoom;
+        _scaleTransform.ScaleX = Zoom;
+        _scaleTransform.ScaleY = Zoom;
         ZoomChanged?.Invoke(this,
-            new ZoomChangedEventArgs(ScaleTransform.ScaleX, ScaleTransform.ScaleY, OffsetX, OffsetY));
+            new ZoomChangedEventArgs(_scaleTransform.ScaleX, _scaleTransform.ScaleY, OffsetX, OffsetY));
         e.Handled = true;
     }
 
@@ -1080,3 +1113,4 @@ public class NodifyEditor : SelectingItemsControl
 
     #endregion
 }
+
