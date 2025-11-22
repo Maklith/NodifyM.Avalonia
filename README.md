@@ -55,6 +55,12 @@ This project is a refactoring of [Nodify](https://github.com/miroiu/nodify) on t
 #### You can git clone the project and run `NodifyM.Avalonia.Example`
 
 ## Changelog
+### 1.1.3
+- Fixed NuGet contains a reference to Avalonia.Diagnostics
+
+### 1.1.2
+- Refactor NodifyEditor to improve transform handling (#13)
+
 ### 1.1.1
 
 - Fix Zoom property only binds one-way

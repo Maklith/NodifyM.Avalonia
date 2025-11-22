@@ -16,9 +16,11 @@ jobs:
       uses: actions/setup-dotnet@v3.0.1
       with:
         dotnet-version: '8.0.x'
+    - name: Switch to project directory
+      run: cd NodifyM.Avalonia
     - name: Install dependencies
       run: dotnet restore
     - name: Build
-      run: dotnet build --configuration Release --no-restore
+      run: dotnet build --configuration Release
     - name: Publish the package
       run: dotnet nuget push "*/bin/Release/*.nupkg" -k ${{ secrets.NugetKey }} -s https://api.nuget.org/v3/index.json
