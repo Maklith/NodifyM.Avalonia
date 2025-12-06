@@ -4,7 +4,9 @@ using System.Windows.Input;
 using Avalonia;
 using Avalonia.Collections;
 using Avalonia.Controls;
+using Avalonia.Controls.Presenters;
 using Avalonia.Controls.Primitives;
+using Avalonia.Controls.Selection;
 using Avalonia.Controls.Shapes;
 using Avalonia.Controls.Templates;
 using Avalonia.Input;
@@ -23,6 +25,21 @@ namespace NodifyM.Avalonia.Controls;
 
 public class NodifyEditor : SelectingItemsControl
 {
+    public static readonly new DirectProperty<SelectingItemsControl, IList?> SelectedItemsProperty =
+        SelectingItemsControl.SelectedItemsProperty;
+
+    public new IList? SelectedItems
+    {
+        get => base.SelectedItems;
+        set => base.SelectedItems = value;
+    }
+
+    public new ISelectionModel Selection
+    {
+        get => base.Selection;
+        set => base.Selection = value;
+    }
+
     public static readonly AvaloniaProperty<object> PendingConnectionProperty =
         AvaloniaProperty.Register<NodifyEditor, object>(nameof(PendingConnection));
 
@@ -213,19 +230,28 @@ public class NodifyEditor : SelectingItemsControl
 
     public void SelectItem(BaseNode? node, bool multSelectMode)
     {
-        var visual = this.GetChildOfType<Canvas>("NodeItemsPresenter").Children;
+        // var visual = this.GetChildOfType<Canvas>("NodeItemsPresenter").Children;
         if (!multSelectMode)
         {
-            foreach (var visualChild in visual)
+            // foreach (var visualChild in visual)
+            // {
+            //     visualChild.ZIndex = 0;
+            //     if (visualChild.GetChildOfType<BaseNode>() is BaseNode n)
+            //     {
+            //         n.IsSelected = false;
+            //     }
+            // }
+
+            foreach (var selectedItem in SelectedItems)
             {
-                visualChild.ZIndex = 0;
-                if (visualChild.GetChildOfType<BaseNode>() is BaseNode n)
+                var container = ContainerFromItem(selectedItem);
+                if (container is ContentPresenter cp && cp.Child is BaseNode n)
                 {
                     n.IsSelected = false;
                 }
             }
 
-            SelectedItems.Clear();
+            Selection.Clear();
         }
 
         if (node == null)
@@ -233,11 +259,12 @@ public class NodifyEditor : SelectingItemsControl
             return;
         }
 
-        if (!SelectedItems!.Contains(node))
+        var c1 = node.Parent as ContentPresenter;
+        if (!SelectedItems.Contains(ItemFromContainer(c1)))
         {
-            SelectedItems.Add(node);
+            UpdateSelection(c1, true, false, true);
             node.IsSelected = true;
-            node.GetVisualParent().ZIndex = 1;
+            c1.ZIndex = 1;
             _lastSelectedNode = null;
         }
         else
@@ -251,9 +278,10 @@ public class NodifyEditor : SelectingItemsControl
         if (SelectedItems == null) yield break;
         foreach (var selectedItem in SelectedItems)
         {
-            if (selectedItem is BaseNode node)
+            var container = ContainerFromItem(selectedItem);
+            if (container is ContentPresenter cp && cp.Child is BaseNode n)
             {
-                yield return node;
+                yield return n;
             }
         }
     }
@@ -305,7 +333,7 @@ public class NodifyEditor : SelectingItemsControl
             e.GetPosition(this) - _lastMousePosition == new Point(0, 0))
         {
             _lastSelectedNode.IsSelected = false;
-            SelectedItems.Remove(_lastSelectedNode);
+            UpdateSelection(_lastSelectedNode, false);
             _lastSelectedNode.GetVisualParent().ZIndex = 0;
         }
     }
@@ -427,7 +455,7 @@ public class NodifyEditor : SelectingItemsControl
     protected override void OnPointerCaptureLost(PointerCaptureLostEventArgs e)
     {
         base.OnPointerCaptureLost(e);
-        SelectionMode = SelectionMode.Single;
+        // SelectionMode = SelectionMode.Single;
         if (!isDragging) return;
         // 停止拖动
         isDragging = false;
@@ -615,33 +643,33 @@ public class NodifyEditor : SelectingItemsControl
     /// <summary>
     /// Gets or sets the <see cref="DataTemplate"/> to use when generating a new <see cref="BaseConnection"/>.
     /// </summary>
-    public DataTemplate ConnectionTemplate
+    public IDataTemplate ConnectionTemplate
     {
-        get => (DataTemplate)GetValue(ConnectionTemplateProperty);
+        get => GetValue(ConnectionTemplateProperty);
         set => SetValue(ConnectionTemplateProperty, value);
     }
 
     /// <summary>
     /// Gets or sets the <see cref="DataTemplate"/> to use when generating a new <see cref="DecoratorContainer"/>.
     /// </summary>
-    public DataTemplate DecoratorTemplate
+    public IDataTemplate DecoratorTemplate
     {
-        get => (DataTemplate)GetValue(DecoratorTemplateProperty);
+        get => GetValue(DecoratorTemplateProperty);
         set => SetValue(DecoratorTemplateProperty, value);
     }
 
     /// <summary>
     /// Gets or sets the <see cref="DataTemplate"/> to use for the <see cref="PendingConnection"/>.
     /// </summary>
-    public DataTemplate PendingConnectionTemplate
+    public IDataTemplate PendingConnectionTemplate
     {
-        get => (DataTemplate)GetValue(PendingConnectionTemplateProperty);
+        get => GetValue(PendingConnectionTemplateProperty);
         set => SetValue(PendingConnectionTemplateProperty, value);
     }
 
-    public DataTemplate GridLineTemplate
+    public IDataTemplate GridLineTemplate
     {
-        get => (DataTemplate)GetValue(GridLineTemplateProperty);
+        get => GetValue(GridLineTemplateProperty);
         set => SetValue(GridLineTemplateProperty, value);
     }
 
@@ -787,7 +815,7 @@ public class NodifyEditor : SelectingItemsControl
 
     public IDataTemplate AlignmentLineTemplate
     {
-        get => (DataTemplate)GetValue(AlignmentLineTemplateProperty);
+        get => GetValue(AlignmentLineTemplateProperty);
         set => SetValue(AlignmentLineTemplateProperty, value);
     }
 
