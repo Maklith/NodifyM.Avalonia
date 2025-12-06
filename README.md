@@ -55,6 +55,11 @@ This project is a refactoring of [Nodify](https://github.com/miroiu/nodify) on t
 #### You can git clone the project and run `NodifyM.Avalonia.Example`
 
 ## Changelog
+
+### 1.1.4
+- Add binding support for NodifyEditor.SelectedItems
+- Change Property from DataTemplate to IDataTemplate interface.
+
 ### 1.1.3
 - Fixed NuGet contains a reference to Avalonia.Diagnostics
 

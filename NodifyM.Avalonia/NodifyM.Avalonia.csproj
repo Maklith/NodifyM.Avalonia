@@ -8,7 +8,7 @@
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <PackageProjectUrl>https://github.com/MakesYT/NodifyM.Avalonia</PackageProjectUrl>
         <LangVersion>10</LangVersion>
-        <Version>1.1.3</Version>
+        <Version>1.1.4</Version>
         <Authors>Maklith</Authors>
         <Description>A collection of controls for node based editors designed for MVVM.</Description>
     </PropertyGroup>
