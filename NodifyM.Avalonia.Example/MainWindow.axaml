@@ -14,11 +14,12 @@
         <StackPanel ZIndex="1" HorizontalAlignment="Left">
             <Button Content="Switch Theme" Command="{Binding ChangeThemeCommand}"></Button>
             <Button ZIndex="1" Content="new" Click="Button_OnClick"></Button>
-            <TextBlock Text="{Binding #Editor.SelectedItem}"></TextBlock>
+            <ItemsControl ItemsSource="{Binding SelectedNodes}"/>
             <Slider Maximum="10" Minimum="0.1" Value="1.1" Name="Slider" Width="200"></Slider>
         </StackPanel>
 
         <controls:NodifyEditor x:Name="Editor"
+                               SelectedItems="{Binding SelectedNodes}"
                                Background="Transparent"
                                ItemsSource="{Binding Nodes }"
                                Connections="{Binding Connections}"

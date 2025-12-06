@@ -8,6 +8,10 @@ public partial class NodifyEditorViewModelBase : ObservableObject
 {
     [ObservableProperty]
     private ObservableCollection<object?> nodes = new();
+
+    [ObservableProperty]
+    private ObservableCollection<object?> selectedNodes = new();
+
     [ObservableProperty]
     private ObservableCollection<ConnectionViewModelBase> connections=new ();
 
