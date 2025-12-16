@@ -163,9 +163,9 @@ public class NodifyEditor : SelectingItemsControl
 
                 // 应用缩放补偿（注意：此时 Zoom 已经被更新为 newZoom）
                 // 使用与鼠标滚轮相同的逻辑，但因为已经缩放，所以直接使用 oldZoom 和 newZoom
-                nodifyEditor.OffsetX += (oldZoom - newZoom) * centerPixels.X / oldZoom;
+                nodifyEditor.OffsetX += (oldZoom - newZoom) * centerPixels.X / newZoom;
                 nodifyEditor.ViewTranslateTransform.X = nodifyEditor.OffsetX;
-                nodifyEditor.OffsetY += (oldZoom - newZoom) * centerPixels.Y / oldZoom;
+                nodifyEditor.OffsetY += (oldZoom - newZoom) * centerPixels.Y / newZoom;
                 nodifyEditor.ViewTranslateTransform.Y = nodifyEditor.OffsetY;
 
                 // 更新缩放变换
