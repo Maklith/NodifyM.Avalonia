@@ -45,6 +45,23 @@
                             Padding="{TemplateBinding Padding}"
                             CornerRadius="3">
                         <Grid>
+                            <Grid.Styles>
+							<Style Selector="Thumb">
+								<Setter Property="Width" Value="12"/>
+								<Setter Property="Height" Value="12"/>
+								
+								<Setter Property="Template">
+									<ControlTemplate>
+										<Grid>
+											<Ellipse Width="{TemplateBinding Width}"
+													 Height="{TemplateBinding Height}"
+													 Fill="{TemplateBinding Background}">
+											</Ellipse>
+										</Grid>
+									</ControlTemplate>
+								</Setter>
+							</Style>
+						</Grid.Styles>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="*" />
@@ -98,6 +115,23 @@
                                     Padding="6 4 6 4">
                                 <ContentPresenter  VerticalAlignment="Center" HorizontalAlignment="Center" Content="{TemplateBinding Footer}"  />
                             </Border>
+
+                            <!-- Hand -->
+						<Thumb Name="PART_TopLeft" Cursor="TopLeftCorner" Grid.RowSpan="3"  IsVisible="{TemplateBinding IsSelected }"
+							   HorizontalAlignment="Left" VerticalAlignment="Top"
+							   Margin="-6,-6,0,0" Background="{TemplateBinding BorderBrush}">
+
+						</Thumb>
+						<Thumb Name="PART_TopRight" Cursor="TopRightCorner"  Grid.RowSpan="3" IsVisible="{TemplateBinding IsSelected }"
+							   HorizontalAlignment="Right" VerticalAlignment="Top"
+							   Margin="0,-6,-6,0" Background="{TemplateBinding BorderBrush}"/>
+						<Thumb Name="PART_BottomLeft" Cursor="BottomLeftCorner"  Grid.RowSpan="3" IsVisible="{TemplateBinding IsSelected }"
+							   HorizontalAlignment="Left" VerticalAlignment="Bottom"
+							   Margin="-6,0,0,-6" Background="{TemplateBinding BorderBrush}"/>
+						<Thumb Name="PART_BottomRight" Cursor="BottomRightCorner" Grid.RowSpan="3"
+							   HorizontalAlignment="Right" VerticalAlignment="Bottom" IsVisible="{TemplateBinding IsSelected }"
+							   Margin="0,0,-6,-6" Background="{TemplateBinding BorderBrush}"/>
+
                         </Grid>
                     </Border>
             </ControlTemplate>
