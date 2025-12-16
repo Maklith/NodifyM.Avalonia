@@ -55,6 +55,8 @@ This project is a refactoring of [Nodify](https://github.com/miroiu/nodify) on t
 #### You can git clone the project and run `NodifyM.Avalonia.Example`
 
 ## Changelog
+### 1.1.5
+- Fixed an incorrect zoom center compensation calculation
 
 ### 1.1.4
 - Add binding support for NodifyEditor.SelectedItems
