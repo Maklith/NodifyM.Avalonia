@@ -54,7 +54,8 @@ public class Node : BaseNode
 
     public static readonly AvaloniaProperty<IEnumerable> OutputProperty =
         AvaloniaProperty.Register<Node, IEnumerable>(nameof(Output));
-
+    public static readonly AvaloniaProperty<bool> IsResizeProperty =
+      AvaloniaProperty.Register<Node, bool>(nameof(IsResize),false);
 
 
     public Brush ContentBrush
@@ -145,6 +146,14 @@ public class Node : BaseNode
     {
         get => (IEnumerable)GetValue(OutputProperty);
         set => SetValue(OutputProperty, value);
+    }
+    /// <summary>
+    /// Get or sets a value indicating whether the Node can be resized.
+    /// </summary>
+    public bool IsResize
+    {
+        get => (bool)GetValue(IsResizeProperty);
+        set => SetValue(IsResizeProperty, value);
     }
 
     /// <summary>
@@ -260,28 +269,27 @@ public class Node : BaseNode
         // 限制最小尺寸
         if (newWidth < MinWidth || newHeight < MinHeight)
             return;
-        // 批量更新，减少布局抖动
+        
         BeginInit();
         try
         {
             if (_isDragging)
             {
-
-                // 拖拽期间：只更新渲染变换，不触发布局
+              
                 if (moveX) _totalDelta = new Vector(deltaX, _totalDelta.Y);
                 if (moveY) _totalDelta = new Vector(_totalDelta.X, deltaY);
 
                 _dragTransform.X = _totalDelta.X;
                 _dragTransform.Y = _totalDelta.Y;
 
-                //// 尺寸无法绕过布局系统，但更新频率降低
+               
                 Width = newWidth;
                 Height = newHeight;
             }
         }
         finally
         {
-            EndInit(); // 一次性提交所有更改
+            EndInit();
         }
 
     }
