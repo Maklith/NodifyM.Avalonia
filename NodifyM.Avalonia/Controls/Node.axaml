@@ -1,113 +1,158 @@
 ﻿<Styles xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:viewModelBase="clr-namespace:NodifyM.Avalonia.ViewModelBase"
-        xmlns:controls="clr-namespace:NodifyM.Avalonia.Controls"
-        xmlns:viewModelBase1="clr-namespace:NodifyM.Avalonia.ViewModelBase">
-    <Design.PreviewWith>
-        <controls:Node Header="design preview" Footer="sds">
-            <Button Content="rr"></Button>
-        </controls:Node>
-    </Design.PreviewWith>
-   
-    <Style Selector="controls|Node">
-        <Setter Property="BorderBrush" Value="{StaticResource Node.BorderBrush}"></Setter>
-        
-        <Setter Property="Background" Value="{StaticResource Node.BackgroundBrush}"></Setter>
-        <Setter Property="HeaderBrush" Value="{StaticResource Node.HeaderBrush}"></Setter>
-        <Setter Property="FooterBrush" Value="{StaticResource Node.FooterBrush}"></Setter>
-        <Setter Property="Foreground"
-                Value="White" />
-        <Setter Property="MinHeight"
-                Value="15" />
-        <Setter Property="MinWidth"
-                Value="15" />
-        <Setter Property="VerticalAlignment"
-                Value="Top" />
-        <Setter Property="HorizontalAlignment"
-                Value="Center" />
-        <Setter Property="VerticalContentAlignment"
-                Value="Center" />
-        <Setter Property="HorizontalContentAlignment"
-                Value="Center" />
-        <Setter Property="BorderThickness" Value="2"></Setter>
-        <Setter Property="Location" x:DataType="viewModelBase1:NodeViewModelBase"
-                Value="{Binding Location}" />
-        <Setter Property="InputConnectorTemplate"
-                Value="{StaticResource DefaultInputConnectorTemplate}" />
-        <Setter Property="OutputConnectorTemplate"
-                Value="{StaticResource DefaultOutputConnectorTemplate}" />
-        <!-- Set Defaults -->
-        <Setter Property="Template">
-            <ControlTemplate>
-                <Border Background="{TemplateBinding Background}"
-                            BorderBrush="{TemplateBinding BorderBrush}"
-                            BorderThickness="{TemplateBinding BorderThickness}"
-                            Padding="{TemplateBinding Padding}"
-                            CornerRadius="3">
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="*" />
-                                <RowDefinition Height="Auto" />
-                            </Grid.RowDefinitions>
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:viewModelBase="clr-namespace:NodifyM.Avalonia.ViewModelBase"
+		xmlns:controls="clr-namespace:NodifyM.Avalonia.Controls"
+		xmlns:viewModelBase1="clr-namespace:NodifyM.Avalonia.ViewModelBase">
+	<Design.PreviewWith>
+		<controls:Node Header="design preview" Footer="sds">
+			<Button Content="rr"></Button>
+		</controls:Node>
+	</Design.PreviewWith>
 
-                            <!--Header-->
-                            <Border IsVisible="{TemplateBinding HasHeader}"
-                                    Background="{TemplateBinding HeaderBrush}"
-                                    CornerRadius="3 3 0 0"
-                                    Grid.ColumnSpan="3"
-                                    Padding="6 4 6 4">
-                                <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center" Content="{TemplateBinding Header}" />
-                            </Border>
+	<Style Selector="controls|Node">
+		<Setter Property="BorderBrush" Value="{StaticResource Node.BorderBrush}"></Setter>
 
-                            <!--Body-->
-                            <Grid Grid.Row="1">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
+		<Setter Property="Background" Value="{StaticResource Node.BackgroundBrush}"></Setter>
+		<Setter Property="HeaderBrush" Value="{StaticResource Node.HeaderBrush}"></Setter>
+		<Setter Property="FooterBrush" Value="{StaticResource Node.FooterBrush}"></Setter>
+		<Setter Property="Foreground"
+				Value="White" />
+		<Setter Property="MinHeight"
+				Value="15" />
+		<Setter Property="MinWidth"
+				Value="15" />
+		<Setter Property="VerticalAlignment"
+				Value="Top" />
+		<Setter Property="HorizontalAlignment"
+				Value="Center" />
+		<Setter Property="VerticalContentAlignment"
+				Value="Center" />
+		<Setter Property="HorizontalContentAlignment"
+				Value="Center" />
+		<Setter Property="BorderThickness" Value="2"></Setter>
+		<Setter Property="Location" x:DataType="viewModelBase1:NodeViewModelBase"
+				Value="{Binding Location}" />
+		<Setter Property="InputConnectorTemplate"
+				Value="{StaticResource DefaultInputConnectorTemplate}" />
+		<Setter Property="OutputConnectorTemplate"
+				Value="{StaticResource DefaultOutputConnectorTemplate}" />
+		<!-- Set Defaults -->
+		<Setter Property="Template">
+			<ControlTemplate>
+				<Border Background="{TemplateBinding Background}"
+						BorderBrush="{TemplateBinding BorderBrush}"
+						BorderThickness="{TemplateBinding BorderThickness}"
+						Padding="{TemplateBinding Padding}"
+						CornerRadius="3">
+					<Grid>
+						<Grid.Styles>
+							<Style Selector="Thumb">
+								<Setter Property="Width" Value="12"/>
+								<Setter Property="Height" Value="12"/>
+								<Setter Property="IsVisible" Value="False"/>
 
-                                <!--Data IN-->
-                                <ItemsControl ItemsSource="{TemplateBinding Input}"
-                                              VerticalAlignment="{TemplateBinding VerticalAlignment}"
-                                              ItemTemplate="{TemplateBinding InputConnectorTemplate}"
-                                              Focusable="False" />
+								<Setter Property="Template">
+									<ControlTemplate>
+										<Grid>
+											<Ellipse Width="{TemplateBinding Width}"
+													 Height="{TemplateBinding Height}"
+													 Fill="{TemplateBinding Background}">
+											</Ellipse>
+										</Grid>
+									</ControlTemplate>
+								</Setter>
+							</Style>
+						</Grid.Styles>
+						
+						<Grid.RowDefinitions>
+							<RowDefinition Height="Auto" />
+							<RowDefinition Height="*" />
+							<RowDefinition Height="Auto" />
+						</Grid.RowDefinitions>
 
-                                <!--Content-->
-                                <Border Grid.Column="1" 
-                                        Padding="16 0 16 0"
-                                        Background="{TemplateBinding ContentBrush}">
-                                    <ContentPresenter Content="{TemplateBinding Content}"/>
-                                </Border>
+						<!--Header-->
+						<Border IsVisible="{TemplateBinding HasHeader}"
+								Background="{TemplateBinding HeaderBrush}"
+								CornerRadius="3 3 0 0"
+								Grid.ColumnSpan="3"
+								Padding="6 4 6 4">
+							<ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center" Content="{TemplateBinding Header}" />
+						</Border>
 
-                                <!--Data OUT-->
-                                <ItemsControl ItemsSource="{TemplateBinding Output}"
-                                              ItemTemplate="{TemplateBinding OutputConnectorTemplate}"
-                                              VerticalAlignment="{TemplateBinding VerticalAlignment}"
-                                              Grid.Column="2"
-                                              Focusable="False" />
-                            </Grid>
+						<!--Body-->
+						<Grid Grid.Row="1">
+							<Grid.ColumnDefinitions>
+								<ColumnDefinition Width="Auto" />
+								<ColumnDefinition Width="*" />
+								<ColumnDefinition Width="Auto" />
+							</Grid.ColumnDefinitions>
 
-                            <!--Footer-->
-                            <Border IsVisible="{TemplateBinding HasFooter}"
-                                    Background="{TemplateBinding FooterBrush}"
-                                    CornerRadius="0 0 3 3"
-                                    Grid.Row="2"
-                                    Grid.ColumnSpan="3"
-                                    Padding="6 4 6 4">
-                                <ContentPresenter  VerticalAlignment="Center" HorizontalAlignment="Center" Content="{TemplateBinding Footer}"  />
-                            </Border>
-                        </Grid>
-                    </Border>
-            </ControlTemplate>
-        </Setter>
-    </Style>
-    <Style Selector="controls|Node[IsSelected=False]:pointerover">
-        <Setter Property="BorderBrush" Value="LightBlue"></Setter>
-        
-    </Style>
-    <Style Selector="controls|Node[IsSelected=True]">
-        <Setter Property="BorderBrush" Value="Orange"></Setter>
-    </Style>
+							<!--Data IN-->
+							<ItemsControl ItemsSource="{TemplateBinding Input}"
+										  VerticalAlignment="{TemplateBinding VerticalAlignment}"
+										  ItemTemplate="{TemplateBinding InputConnectorTemplate}"
+										  Focusable="False" />
+
+							<!--Content-->
+							<Border Grid.Column="1"
+									Padding="16 0 16 0"
+									Background="{TemplateBinding ContentBrush}">
+								<ContentPresenter Content="{TemplateBinding Content}"/>
+							</Border>
+
+							<!--Data OUT-->
+							<ItemsControl ItemsSource="{TemplateBinding Output}"
+										  ItemTemplate="{TemplateBinding OutputConnectorTemplate}"
+										  VerticalAlignment="{TemplateBinding VerticalAlignment}"
+										  Grid.Column="2"
+										  Focusable="False" />
+						</Grid>
+
+						<!--Footer-->
+						<Border IsVisible="{TemplateBinding HasFooter}"
+								Background="{TemplateBinding FooterBrush}"
+								CornerRadius="0 0 3 3"
+								Grid.Row="2"
+								Grid.ColumnSpan="3"
+								Padding="6 4 6 4">
+							<ContentPresenter  VerticalAlignment="Center" HorizontalAlignment="Center" Content="{TemplateBinding Footer}"  />
+						</Border>
+
+						<!-- Hand -->
+						<Thumb Name="PART_TopLeft" Cursor="TopLeftCorner" Grid.RowSpan="3" 
+							   HorizontalAlignment="Left" VerticalAlignment="Top"
+							   Margin="-6,-6,0,0" Background="{TemplateBinding BorderBrush}">
+
+						</Thumb>
+						<Thumb Name="PART_TopRight" Cursor="TopRightCorner"  Grid.RowSpan="3" 
+							   HorizontalAlignment="Right" VerticalAlignment="Top"
+							   Margin="0,-6,-6,0" Background="{TemplateBinding BorderBrush}"/>
+						<Thumb Name="PART_BottomLeft" Cursor="BottomLeftCorner"  Grid.RowSpan="3" 
+							   HorizontalAlignment="Left" VerticalAlignment="Bottom"
+							   Margin="-6,0,0,-6" Background="{TemplateBinding BorderBrush}"/>
+						<Thumb Name="PART_BottomRight" Cursor="BottomRightCorner" Grid.RowSpan="3"
+							   HorizontalAlignment="Right" VerticalAlignment="Bottom" 
+							   Margin="0,0,-6,-6" Background="{TemplateBinding BorderBrush}"/>
+
+					</Grid>
+				</Border>
+			</ControlTemplate>
+		</Setter>
+	</Style>
+	<Style Selector="controls|Node[IsSelected=False]:pointerover">
+		<Setter Property="BorderBrush" Value="LightBlue"></Setter>
+
+	</Style>
+	<Style Selector="controls|Node[IsSelected=True]">
+		<Setter Property="BorderBrush" Value="Orange"></Setter>
+	</Style>
+	<Style Selector="controls|Node[IsSelected=True][IsResize=True]">
+		<Style Selector="^ /template/Thumb">
+			<Setter Property="IsVisible" Value="True"/>
+			
+		</Style>
+			
+	</Style>
+
+
 </Styles>

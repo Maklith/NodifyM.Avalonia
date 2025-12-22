@@ -124,6 +124,7 @@
                     </DataTemplate>
                     <DataTemplate DataType="viewModelBase:NodeViewModelBase">
                         <controls:Node x:Name="Node"
+                                       IsResize="True"
                                        Input="{Binding Input}"
                                        Header="{Binding Title}"
                                        Location="{Binding Location,Mode=TwoWay}"
