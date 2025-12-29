@@ -1083,7 +1083,7 @@ public class NodifyEditor : SelectingItemsControl
 
     private void OnNodeLocationChanged(object? sender, NodeLocationEventArgs e)
     {
-        if (!AllowAutoPanning)
+        if (!AllowAutoPanning || !_isNodeDragging)
         {
             return;
         }
