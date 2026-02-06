@@ -55,6 +55,9 @@ This project is a refactoring of [Nodify](https://github.com/miroiu/nodify) on t
 #### You can git clone the project and run `NodifyM.Avalonia.Example`
 
 ## Changelog
+### 1.1.8
+- Fixed unselect nodes not working when clicking with `Ctrl` key pressed
+
 ### 1.1.7
 - Prevent auto-panning when not dragging a node
 
