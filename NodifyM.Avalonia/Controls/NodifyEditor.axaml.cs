@@ -260,16 +260,16 @@ public class NodifyEditor : SelectingItemsControl
         }
 
         var c1 = node.Parent as ContentPresenter;
-        if (!SelectedItems.Contains(ItemFromContainer(c1)))
+        if (SelectedItems.Contains(ItemFromContainer(c1)))
+        {
+            _lastSelectedNode = node;
+        }
+        else
         {
             UpdateSelection(c1, true, false, true);
             node.IsSelected = true;
             c1.ZIndex = 1;
             _lastSelectedNode = null;
-        }
-        else
-        {
-            _lastSelectedNode = node;
         }
     }
 
@@ -333,7 +333,10 @@ public class NodifyEditor : SelectingItemsControl
             e.GetPosition(this) - _lastMousePosition == new Point(0, 0))
         {
             _lastSelectedNode.IsSelected = false;
-            UpdateSelection(_lastSelectedNode, false);
+            if (_lastSelectedNode.Parent is ContentPresenter cp)
+            {
+                UpdateSelection(cp, false);
+            }
             _lastSelectedNode.GetVisualParent().ZIndex = 0;
         }
     }
