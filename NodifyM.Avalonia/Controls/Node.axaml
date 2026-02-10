@@ -76,7 +76,7 @@
 								CornerRadius="3 3 0 0"
 								Grid.ColumnSpan="3"
 								Padding="6 4 6 4">
-							<ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center" Content="{TemplateBinding Header}" />
+							<ContentPresenter Name="HeaderContentPresenter" Content="{TemplateBinding Header}" />
 						</Border>
 
 						<!--Body-->
@@ -115,7 +115,7 @@
 								Grid.Row="2"
 								Grid.ColumnSpan="3"
 								Padding="6 4 6 4">
-							<ContentPresenter  VerticalAlignment="Center" HorizontalAlignment="Center" Content="{TemplateBinding Footer}"  />
+							<ContentPresenter Name="FooterContentPresenter"  Content="{TemplateBinding Footer}"  />
 						</Border>
 
 						<!-- Hand -->
@@ -139,9 +139,14 @@
 			</ControlTemplate>
 		</Setter>
 	</Style>
+	<Style Selector="controls|Node ContentPresenter#HeaderContentPresenter">
+		<Setter Property="HorizontalAlignment" Value="Center"></Setter>
+	</Style>
+	<Style Selector="controls|Node ContentPresenter#FooterContentPresenter">
+		<Setter Property="HorizontalAlignment" Value="Center"></Setter>
+	</Style>
 	<Style Selector="controls|Node[IsSelected=False]:pointerover">
 		<Setter Property="BorderBrush" Value="LightBlue"></Setter>
-
 	</Style>
 	<Style Selector="controls|Node[IsSelected=True]">
 		<Setter Property="BorderBrush" Value="Orange"></Setter>
@@ -149,9 +154,7 @@
 	<Style Selector="controls|Node[IsSelected=True][IsResize=True]">
 		<Style Selector="^ /template/Thumb">
 			<Setter Property="IsVisible" Value="True"/>
-			
 		</Style>
-			
 	</Style>
 
 

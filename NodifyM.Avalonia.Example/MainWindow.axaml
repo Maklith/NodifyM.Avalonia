@@ -126,10 +126,25 @@
                         <controls:Node x:Name="Node"
                                        IsResize="True"
                                        Input="{Binding Input}"
-                                       Header="{Binding Title}"
+                                       
                                        Location="{Binding Location,Mode=TwoWay}"
                                        VerticalAlignment="Center"
                                        Output="{Binding Output}">
+                            <controls:Node.Styles>
+                                <Style Selector="controls|Node /template/ ContentPresenter#HeaderContentPresenter">
+                                    <Setter Property="HorizontalAlignment" Value="Stretch"></Setter>
+                                </Style>
+                            </controls:Node.Styles>
+                            <controls:Node.Header>
+                                <Grid HorizontalAlignment="Stretch">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" VerticalAlignment="Center" Text="Left Content" />
+                                    <TextBlock Grid.Column="1" VerticalAlignment="Center" Text="{Binding Title}" />
+                                </Grid>
+                            </controls:Node.Header>
                             <controls:Node.Styles>
                                 <Style Selector="controls|Node[IsSelected=False]:pointerover">
                                     <Setter Property="BorderBrush" Value="AliceBlue"></Setter>
@@ -142,14 +157,7 @@
                                         VerticalAlignment="Center"
                                         IsConnected="{Binding IsConnected}"
                                         Anchor="{Binding Anchor, Mode=OneWayToSource}">
-                                        <controls:NodeInput.Header>
-                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center"
-                                                        HorizontalAlignment="Right">
-
-                                                <TextBlock VerticalAlignment="Center" x:Name="textBlock"
-                                                           Text="{Binding Title}" />
-                                            </StackPanel>
-                                        </controls:NodeInput.Header>
+                                        
                                         <controls:NodeInput.BorderBrush>
                                             <SolidColorBrush
                                                 Color="CornflowerBlue"
@@ -167,12 +175,14 @@
                                         IsConnected="{Binding IsConnected}"
                                         Anchor="{Binding Anchor, Mode=OneWayToSource}">
                                         <controls:NodeOutput.Header>
-                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center"
-                                                        HorizontalAlignment="Right">
-
-                                                <TextBlock VerticalAlignment="Center" x:Name="textBlock"
-                                                           Text="{Binding Title}" />
-                                            </StackPanel>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Grid.Column="0" VerticalAlignment="Center" Text="Left Content" />
+                                                <TextBlock Grid.Column="1" VerticalAlignment="Center" Text="{Binding Title}" />
+                                            </Grid>
                                         </controls:NodeOutput.Header>
                                         <controls:NodeOutput.BorderBrush>
                                             <SolidColorBrush
