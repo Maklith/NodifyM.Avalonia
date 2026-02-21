@@ -3,14 +3,9 @@ using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Templates;
 using Avalonia.Input;
-using Avalonia.Interactivity;
-using Avalonia.LogicalTree;
 using Avalonia.Markup.Xaml.Templates;
 using Avalonia.Media;
-using Avalonia.VisualTree;
-using NodifyM.Avalonia.ViewModelBase;
 using System.Collections;
-using System.Diagnostics;
 
 namespace NodifyM.Avalonia.Controls;
 

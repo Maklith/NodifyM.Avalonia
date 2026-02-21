@@ -1,5 +1,4 @@
-﻿using Avalonia;
-using Avalonia.Interactivity;
+﻿using Avalonia.Interactivity;
 using NodifyM.Avalonia.Controls;
 
 namespace NodifyM.Avalonia.Events;

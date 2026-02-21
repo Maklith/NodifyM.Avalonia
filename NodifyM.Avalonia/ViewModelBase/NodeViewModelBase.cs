@@ -1,5 +1,4 @@
 ﻿using System.Collections.ObjectModel;
-using Avalonia;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace NodifyM.Avalonia.ViewModelBase;
