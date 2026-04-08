@@ -19,10 +19,11 @@ This project is a refactoring of [Nodify](https://github.com/miroiu/nodify) on t
    - auto align Node
    - display text on Connection
    - Select multiple nodes
+   - Minimap
  - **Nonsupport**
-     - Minimap
+ - 
  - **Will be supported in the future**
-   - 
+ - 
 ## Usage
 ### NodifyEditor
  - `Press` and `Hold` -> Move the all show items
@@ -55,6 +56,9 @@ This project is a refactoring of [Nodify](https://github.com/miroiu/nodify) on t
 #### You can git clone the project and run `NodifyM.Avalonia.Example`
 
 ## Changelog
+
+### 1.2.1
+- Add Minimap control for `NodifyEditor`
 
 ### 1.2.0
 - Support for Avalonia 12

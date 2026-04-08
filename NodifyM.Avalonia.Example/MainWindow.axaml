@@ -11,7 +11,12 @@
         x:DataType="example:MainWindowViewModel"
         Title="Nodify.Avalonia.Example">
     <Grid>
-        <StackPanel ZIndex="1" HorizontalAlignment="Left">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="280" />
+        </Grid.ColumnDefinitions>
+
+        <StackPanel ZIndex="1" Grid.Column="0" HorizontalAlignment="Left">
             <Button Content="Switch Theme" Command="{Binding ChangeThemeCommand}"></Button>
             <Button ZIndex="1" Content="new" Click="Button_OnClick"></Button>
             <ItemsControl ItemsSource="{Binding SelectedNodes}"/>
@@ -19,6 +24,8 @@
         </StackPanel>
 
         <controls:NodifyEditor x:Name="Editor"
+                               Grid.Column="0"
+                               Grid.ColumnSpan="2"
                                SelectedItems="{Binding SelectedNodes}"
                                Background="Transparent"
                                ItemsSource="{Binding Nodes }"
@@ -199,5 +206,21 @@
 
 
         </controls:NodifyEditor>
+
+        <Border Grid.Column="1"
+                Margin="12"
+                Padding="8"
+                CornerRadius="6"
+                BorderThickness="1"
+                VerticalAlignment="Bottom"
+                BorderBrush="{StaticResource GridLinesColorBrush}">
+            <StackPanel Spacing="8">
+                <TextBlock Text="Minimap"
+                           FontWeight="SemiBold" />
+                <controls:NodifyEditorMinimap
+                    Height="180"
+                    Editor="{Binding #Editor}" />
+            </StackPanel>
+        </Border>
     </Grid>
 </Window>

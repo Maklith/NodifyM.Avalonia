@@ -1,4 +1,4 @@
-﻿<Styles xmlns="https://github.com/avaloniaui"
+<Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:controls="clr-namespace:NodifyM.Avalonia.Controls">
     <Design.PreviewWith>
@@ -50,10 +50,10 @@
                             </ItemsControl.Styles>
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
-                                    <Canvas
-                                        Width="{Binding $parent[Canvas].Bounds.Width}"
-                                        Height="{Binding $parent[Canvas].Bounds.Height}"
-                                        RenderTransform="{Binding $parent[controls:NodifyEditor].ViewTranslateTransform}" />
+                                        <Canvas
+                                            Width="{Binding $parent[Canvas].Bounds.Width}"
+                                            Height="{Binding $parent[Canvas].Bounds.Height}"
+                                            RenderTransform="{Binding $parent[controls:NodifyEditor].ViewTranslateTransform}" />
                                 </ItemsPanelTemplate>
                             </ItemsControl.ItemsPanel>
                         </ItemsControl>
@@ -69,16 +69,14 @@
                             </ItemsControl.Styles>
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
-                                    <Canvas
-                                        Width="{Binding $parent[Canvas].Bounds.Width}"
-                                        Height="{Binding $parent[Canvas].Bounds.Height}"
-                                        RenderTransform="{Binding $parent[controls:NodifyEditor].ViewTranslateTransform}" />
+                                        <Canvas
+                                            Width="{Binding $parent[Canvas].Bounds.Width}"
+                                            Height="{Binding $parent[Canvas].Bounds.Height}"
+                                            RenderTransform="{Binding $parent[controls:NodifyEditor].ViewTranslateTransform}" />
                                 </ItemsPanelTemplate>
                             </ItemsControl.ItemsPanel>
                         </ItemsControl>
                     </Canvas>
-
-
                 </Border>
             </ControlTemplate>
         </Setter>
@@ -91,6 +89,27 @@
         </Setter>
 
         <Setter Property="Background" Value="Azure"></Setter>
+    </Style>
+    <Style Selector="controls|NodifyEditorMinimap">
+        <Setter Property="MapBackground">
+            <SolidColorBrush Color="{DynamicResource NodifyEditor.BackgroundColor}" Opacity="0.92" />
+        </Setter>
+        <Setter Property="MapBorderBrush">
+            <SolidColorBrush Color="{DynamicResource GridLinesColor}" />
+        </Setter>
+        <Setter Property="NodeBrush">
+            <SolidColorBrush Color="{DynamicResource Node.HeaderColor}" Opacity="0.55" />
+        </Setter>
+        <Setter Property="NodeBorderBrush">
+            <SolidColorBrush Color="{DynamicResource Node.BackgroundColor}" />
+        </Setter>
+        <Setter Property="ViewportBrush">
+            <SolidColorBrush Color="{DynamicResource NodifyEditor.SelectionRectangleColor}" Opacity="0.25" />
+        </Setter>
+        <Setter Property="ViewportBorderBrush">
+            <SolidColorBrush Color="{DynamicResource NodifyEditor.SelectionRectangleColor}" />
+        </Setter>
+        <Setter Property="Cursor" Value="Hand" />
     </Style>
     <Style Selector="controls|NodifyEditor > ContentPresenter">
 
