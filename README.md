@@ -16,6 +16,7 @@ This project is a refactoring of [Nodify](https://github.com/miroiu/nodify) on t
  - Built-in dark and light **themes**
  - **Selecting**， **zooming**， **panning**
  - Select， move, **_auto align_**, **auto panning** when close to edge and connect nodes
+ - AotCompatible
 ### What are the differences compared to Nodify
  - **Supports** 
    - auto align Node
@@ -58,6 +59,11 @@ This project is a refactoring of [Nodify](https://github.com/miroiu/nodify) on t
 #### You can git clone the project and run `NodifyM.Avalonia.Example`
 
 ## Changelog
+
+### 1.3.0
+- Now is AotCompatible
+- In 1.2.1 due to an issue with Avalonia, the connector could not be hit correctly, and has now been upgraded to 12.0.2
+- Fix all warning messages
 
 ### 1.2.1
 - Add Minimap control for `NodifyEditor`
