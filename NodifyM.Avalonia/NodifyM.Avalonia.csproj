@@ -10,23 +10,18 @@
         <Version>1.2.1</Version>
         <Authors>Maklith</Authors>
         <Description>A collection of controls for node based editors designed for MVVM.</Description>
+        <IsAotCompatible>true</IsAotCompatible>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Avalonia" Version="12.0.2" />
-        <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
+        <PackageReference Include="Avalonia" Version="12.0.2"/>
+        <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2"/>
         <PackageReference Include="System.Reactive" Version="6.0.1"/>
     </ItemGroup>
-  <PropertyGroup>
-    <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
-  </PropertyGroup>
-
-    <ItemGroup>
-        <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
-            <_Parameter1>NodifyM.Avalonia.Tests</_Parameter1>
-        </AssemblyAttribute>
-    </ItemGroup>
+    <PropertyGroup>
+        <PackageLicenseFile>LICENSE</PackageLicenseFile>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+    </PropertyGroup>
 
     <ItemGroup>
         <None Include="..\README.md">
