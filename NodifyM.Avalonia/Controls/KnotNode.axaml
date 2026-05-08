@@ -35,8 +35,8 @@
                             BorderThickness="{TemplateBinding BorderThickness}"
                             Padding="{TemplateBinding Padding}"
                             CornerRadius="3">
-                        <ContentPresenter Cursor="Arrow" x:Name="PART_Connector" x:DataType="viewModelBase:KnotNodeViewModel" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" 
-                                          DataContext="{ReflectionBinding Path=Connector}"/>
+                        <ContentPresenter Cursor="Arrow" x:Name="PART_Connector" x:DataType="viewModelBase:KnotNodeViewModel" Content="{TemplateBinding Content}" 
+                                          ContentTemplate="{TemplateBinding ContentTemplate}" />
                     </Border>
                 </ControlTemplate>
             </Setter.Value>
