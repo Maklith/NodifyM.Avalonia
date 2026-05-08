@@ -1,6 +1,7 @@
 <Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:controls="clr-namespace:NodifyM.Avalonia.Controls">
+        xmlns:controls="clr-namespace:NodifyM.Avalonia.Controls"
+        xmlns:viewModelBase="clr-namespace:NodifyM.Avalonia.ViewModelBase">
     <Design.PreviewWith>
         <controls:NodifyEditor>
 
@@ -111,10 +112,10 @@
         </Setter>
         <Setter Property="Cursor" Value="Hand" />
     </Style>
-    <Style Selector="controls|NodifyEditor > ContentPresenter">
+    <Style Selector="controls|NodifyEditor > ContentPresenter" x:DataType="viewModelBase:BaseNodeViewModel">
 
-        <Setter Property="Canvas.Left" Value="{ReflectionBinding Location.X }" />
-        <Setter Property="Canvas.Top" Value="{ReflectionBinding Location.Y }" />
+        <Setter Property="Canvas.Left" Value="{Binding Location.X}" />
+        <Setter Property="Canvas.Top" Value="{Binding Location.Y}" />
 
     </Style>
 
