@@ -13,7 +13,7 @@
     <Style Selector="controls|PendingConnection">
         <!-- Set Defaults -->
         <Style.Resources>
-            <converters:PendingConnectionCanvasWHCtr x:Key="PendingConnectionCanvasWHCtr" />
+            <converters:PendingConnectionCanvasWhCtr x:Key="PendingConnectionCanvasWhCtr" />
         </Style.Resources>
         <Setter Property="IsHitTestVisible"
                 Value="False" />

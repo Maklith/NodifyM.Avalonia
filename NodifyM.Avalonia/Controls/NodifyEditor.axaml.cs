@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Diagnostics.CodeAnalysis;
 using System.Windows.Input;
 using Avalonia;
 using Avalonia.Collections;
@@ -61,20 +62,20 @@ public class NodifyEditor : SelectingItemsControl
         AvaloniaProperty.Register<NodifyEditor, double>(nameof(OffsetY), 1d);
 
     public static readonly StyledProperty<TranslateTransform> ViewTranslateTransformProperty =
-        AvaloniaProperty.Register<NodifyEditor, TranslateTransform>(nameof(ViewTranslateTransform));
+        AvaloniaProperty.Register<NodifyEditor, TranslateTransform>(nameof(ViewTranslateTransform),new TranslateTransform());
 
     public static readonly AvaloniaProperty<IEnumerable> ConnectionsProperty =
         AvaloniaProperty.Register<NodifyEditor, IEnumerable>(nameof(Connections));
 
-    private Rectangle _dragRectangle;
+    private Rectangle? _dragRectangle;
     private Point _dragRectangleStartPoint;
 
     private double _initHeight;
 
 
     private double _initWeight;
-    private bool _isCreateDragRectangle = false;
-    private bool _isNodeDragging = false;
+    private bool _isCreateDragRectangle;
+    private bool _isNodeDragging;
     private BaseNode? _lastSelectedNode;
     private Dictionary<BaseNode, Point> _nodeStartLocation = new();
 
@@ -88,10 +89,8 @@ public class NodifyEditor : SelectingItemsControl
     /// <summary>
     /// 标记是否先启动了拖动
     /// </summary>
-    private bool isDragging;
-
-    private bool isZooming = false;
-
+    private bool _isDragging;
+    
     /// <summary>
     /// 记录上一次鼠标位置
     /// </summary>
@@ -109,7 +108,7 @@ public class NodifyEditor : SelectingItemsControl
         AddHandler(BaseConnection.DisconnectEvent, OnRemoveConnection);
         EnsureTransformsInitialized();
     }
-    
+    [MemberNotNull(nameof(_scaleTransform))]
     private void EnsureTransformsInitialized()
     {
         if (_scaleTransform == null)
@@ -126,11 +125,6 @@ public class NodifyEditor : SelectingItemsControl
         if (!transformGroup.Children.Contains(_scaleTransform))
         {
             transformGroup.Children.Add(_scaleTransform);
-        }
-
-        if (ViewTranslateTransform == null)
-        {
-            ViewTranslateTransform = new TranslateTransform();
         }
     }
 
@@ -159,14 +153,13 @@ public class NodifyEditor : SelectingItemsControl
                 // 计算缩放中心点的像素坐标（基于当前视口大小）
                 var centerPixels = nodifyEditor.ZoomCenter.ToPixels(
                     new Size(nodifyEditor.Bounds.Width, nodifyEditor.Bounds.Height));
-
-                // 应用缩放补偿（注意：此时 Zoom 已经被更新为 newZoom）
-                // 使用与鼠标滚轮相同的逻辑，但因为已经缩放，所以直接使用 oldZoom 和 newZoom
+                
                 nodifyEditor.OffsetX += (oldZoom - newZoom) * centerPixels.X / newZoom;
                 nodifyEditor.ViewTranslateTransform.X = nodifyEditor.OffsetX;
                 nodifyEditor.OffsetY += (oldZoom - newZoom) * centerPixels.Y / newZoom;
                 nodifyEditor.ViewTranslateTransform.Y = nodifyEditor.OffsetY;
 
+                nodifyEditor.EnsureTransformsInitialized();
                 // 更新缩放变换
                 nodifyEditor._scaleTransform.ScaleX = newZoom;
                 nodifyEditor._scaleTransform.ScaleY = newZoom;
@@ -189,39 +182,39 @@ public class NodifyEditor : SelectingItemsControl
 
     }
 
-    public object PendingConnection
+    public object? PendingConnection
     {
-        get => (object)GetValue(PendingConnectionProperty);
+        get => GetValue(PendingConnectionProperty);
         set => SetValue(PendingConnectionProperty, value);
     }
 
     public TranslateTransform ViewTranslateTransform
     {
-        get => (TranslateTransform)GetValue(ViewTranslateTransformProperty);
+        get => GetValue(ViewTranslateTransformProperty);
         set => SetValue(ViewTranslateTransformProperty, value);
     }
 
     public double OffsetX
     {
-        get => (double)GetValue(OffsetXProperty);
+        get => (double)GetValue(OffsetXProperty)!;
         set => SetValue(OffsetXProperty, value);
     }
 
     public double OffsetY
     {
-        get => (double)GetValue(OffsetYProperty);
+        get => (double)GetValue(OffsetYProperty)!;
         set => SetValue(OffsetYProperty, value);
     }
 
     public double Zoom
     {
-        get => (double)GetValue(ZoomProperty);
+        get => (double)GetValue(ZoomProperty)!;
         set => SetValue(ZoomProperty, value);
     }
 
-    public IEnumerable Connections
+    public IEnumerable? Connections
     {
-        get => (IEnumerable)GetValue(ConnectionsProperty);
+        get => (IEnumerable?)GetValue(ConnectionsProperty);
         set => SetValue(ConnectionsProperty, value);
     }
 
@@ -230,8 +223,7 @@ public class NodifyEditor : SelectingItemsControl
     public void SelectItem(BaseNode? node, bool multSelectMode)
     {
         // var visual = this.GetChildOfType<Canvas>("NodeItemsPresenter").Children;
-        if (!multSelectMode)
-        {
+        if (!multSelectMode) {
             // foreach (var visualChild in visual)
             // {
             //     visualChild.ZIndex = 0;
@@ -241,31 +233,36 @@ public class NodifyEditor : SelectingItemsControl
             //     }
             // }
 
-            foreach (var selectedItem in SelectedItems)
-            {
-                var container = ContainerFromItem(selectedItem);
-                if (container is ContentPresenter cp && cp.Child is BaseNode n)
-                {
-                    n.IsSelected = false;
+            if (SelectedItems != null)
+                foreach (var selectedItem in SelectedItems) {
+                    var container = ContainerFromItem(selectedItem);
+                    if (container is ContentPresenter cp && cp.Child is BaseNode n) {
+                        n.IsSelected = false;
+                    }
                 }
-            }
 
             Selection.Clear();
         }
-
+        
         if (node == null)
         {
             return;
         }
 
         var c1 = node.Parent as ContentPresenter;
-        if (SelectedItems.Contains(ItemFromContainer(c1)))
+        if (SelectedItems != null&&c1 !=null && SelectedItems.Contains(ItemFromContainer(c1)))
         {
             _lastSelectedNode = node;
         }
-        else
+        else if (c1 != null)
         {
-            UpdateSelection(c1, true, false, true);
+
+            var index = IndexFromContainer(c1);
+            if (index >= 0)
+            {
+                Selection.Select(index);
+            }
+
             node.IsSelected = true;
             c1.ZIndex = 1;
             _lastSelectedNode = null;
@@ -325,7 +322,7 @@ public class NodifyEditor : SelectingItemsControl
         _isNodeDragging = false;
         e.Handled = true;
         // 停止计时器
-        AutoPanningTimer.Stop();
+        _autoPanningTimer?.Stop();
         ClearAlignmentLine();
 
         if (_lastSelectedNode != null && e.KeyModifiers.HasFlag(KeyModifiers.Control) &&
@@ -334,9 +331,17 @@ public class NodifyEditor : SelectingItemsControl
             _lastSelectedNode.IsSelected = false;
             if (_lastSelectedNode.Parent is ContentPresenter cp)
             {
-                UpdateSelection(cp, false);
+                var index = IndexFromContainer(cp);
+                if (index >= 0)
+                {
+                    Selection.Deselect(index);
+                }
+                
             }
-            _lastSelectedNode.GetVisualParent().ZIndex = 0;
+            if (_lastSelectedNode.GetVisualParent() is { } visualParent)
+            {
+                visualParent.ZIndex = 0;
+            }
         }
     }
 
@@ -344,9 +349,9 @@ public class NodifyEditor : SelectingItemsControl
     {
         // 如果没有启动拖动，则不执行
         if (!_isNodeDragging) return;
-        if (!AutoPanningTimer.IsEnabled)
+        if (_autoPanningTimer != null && !_autoPanningTimer.IsEnabled)
         {
-            AutoPanningTimer.Start();
+            _autoPanningTimer.Start();
         }
 
         var currentMousePosition = e.GetPosition(this);
@@ -376,20 +381,18 @@ public class NodifyEditor : SelectingItemsControl
         EnsureTransformsInitialized();
         if (Parent != null) ((Control)Parent).SizeChanged += (OnSizeChanged);
 
-        AutoPanningTimer ??= new DispatcherTimer(TimeSpan.FromMilliseconds(10), DispatcherPriority.Normal, HandleAutoPanning);
-        AutoPanningTimer.Stop();
-
-        AlignmentLine ??= new AvaloniaList<object>();
+        _autoPanningTimer ??= new DispatcherTimer(TimeSpan.FromMilliseconds(10), DispatcherPriority.Normal, HandleAutoPanning);
+        _autoPanningTimer?.Stop();
     }
 
     protected override void OnLoaded(RoutedEventArgs e)
     {
         base.OnLoaded(e);
         EnsureTransformsInitialized();
-        var T = 0.0d;
-        var L = 0.0d;
-        var B = 0d;
-        var R = 0d;
+        var t = 0.0d;
+        var l = 0.0d;
+        var b = 0d;
+        var r = 0d;
         var childOfType = this.GetChildOfType<Canvas>("NodeItemsPresenter");
         if (childOfType != null)
         {
@@ -397,42 +400,42 @@ public class NodifyEditor : SelectingItemsControl
             {
                 var logicalChildLogicalChild = ((BaseNode)logicalChild.GetVisualChildren().First());
                 var location = logicalChildLogicalChild.Location;
-                if (location.Y < T)
+                if (location.Y < t)
                 {
-                    T = location.Y;
+                    t = location.Y;
                 }
 
-                if (location.X < L)
+                if (location.X < l)
                 {
-                    L = location.X;
+                    l = location.X;
                 }
 
-                if (location.Y + logicalChildLogicalChild.Bounds.Height > B)
+                if (location.Y + logicalChildLogicalChild.Bounds.Height > b)
                 {
-                    B = location.Y + logicalChildLogicalChild.Bounds.Height;
+                    b = location.Y + logicalChildLogicalChild.Bounds.Height;
                 }
 
-                if (location.X + logicalChildLogicalChild.Bounds.Width > R)
+                if (location.X + logicalChildLogicalChild.Bounds.Width > r)
                 {
-                    R = location.X + logicalChildLogicalChild.Bounds.Width;
+                    r = location.X + logicalChildLogicalChild.Bounds.Width;
                 }
             }
         }
 
-        ViewTranslateTransform.X = -L;
-        ViewTranslateTransform.Y = -T;
-        OffsetY = -T;
-        OffsetX = -L;
-        if (1 / (Math.Abs(T - B) / _initHeight) < _scaleTransform.ScaleY)
+        ViewTranslateTransform.X = -l;
+        ViewTranslateTransform.Y = -t;
+        OffsetY = -t;
+        OffsetX = -l;
+        if (1 / (Math.Abs(t - b) / _initHeight) < _scaleTransform.ScaleY)
         {
-            _scaleTransform.ScaleY = 1 / (Math.Abs(T - B) / _initHeight);
-            _scaleTransform.ScaleX = 1 / (Math.Abs(T - B) / _initHeight);
+            _scaleTransform.ScaleY = 1 / (Math.Abs(t - b) / _initHeight);
+            _scaleTransform.ScaleX = 1 / (Math.Abs(t - b) / _initHeight);
         }
 
-        if (1 / (Math.Abs(L - R) / _initWeight) < _scaleTransform.ScaleY)
+        if (1 / (Math.Abs(l - r) / _initWeight) < _scaleTransform.ScaleY)
         {
-            _scaleTransform.ScaleY = 1 / (Math.Abs(L - R) / _initWeight);
-            _scaleTransform.ScaleX = 1 / (Math.Abs(L - R) / _initWeight);
+            _scaleTransform.ScaleY = 1 / (Math.Abs(l - r) / _initWeight);
+            _scaleTransform.ScaleX = 1 / (Math.Abs(l - r) / _initWeight);
         }
 
         Zoom = _scaleTransform.ScaleY;
@@ -458,12 +461,12 @@ public class NodifyEditor : SelectingItemsControl
     {
         base.OnPointerCaptureLost(e);
         // SelectionMode = SelectionMode.Single;
-        if (!isDragging) return;
+        if (!_isDragging) return;
         // 停止拖动
-        isDragging = false;
+        _isDragging = false;
         e.Handled = true;
         // 停止计时器
-        AutoPanningTimer.Stop();
+        _autoPanningTimer?.Stop();
     }
 
     protected override void OnPointerPressed(PointerPressedEventArgs e)
@@ -477,20 +480,23 @@ public class NodifyEditor : SelectingItemsControl
         SelectItem(null, false);
         if (e.KeyModifiers.HasFlag(KeyModifiers.Control))
         {
-            _dragRectangle.IsVisible = true;
-            _dragRectangle.SetValue(Canvas.LeftProperty, e.GetPosition(this).X);
-            _dragRectangle.SetValue(Canvas.TopProperty, e.GetPosition(this).Y);
-            _dragRectangle.Width = 0;
-            _dragRectangle.Height = 0;
-            _dragRectangleStartPoint = e.GetPosition(this);
-            _isCreateDragRectangle = true;
-            return;
+            if (_dragRectangle != null)
+            {
+                _dragRectangle.IsVisible = true;
+                _dragRectangle.SetValue(Canvas.LeftProperty, e.GetPosition(this).X);
+                _dragRectangle.SetValue(Canvas.TopProperty, e.GetPosition(this).Y);
+                _dragRectangle.Width = 0;
+                _dragRectangle.Height = 0;
+                _dragRectangleStartPoint = e.GetPosition(this);
+                _isCreateDragRectangle = true;
+                return;
+            }
         }
 
 
         SelectedItem = null;
         if (!e.GetCurrentPoint(this).Properties.IsLeftButtonPressed) return;
-        isDragging = true;
+        _isDragging = true;
         _lastMousePosition = e.GetPosition(this);
         _startOffsetX = OffsetX;
         _startOffsetY = OffsetY;
@@ -508,32 +514,35 @@ public class NodifyEditor : SelectingItemsControl
         if (_isCreateDragRectangle)
         {
             //获取选中区域内的节点
-            var rect = new Rect(Canvas.GetLeft(_dragRectangle) - OffsetX, Canvas.GetTop(_dragRectangle) - OffsetY,
-                _dragRectangle.Width,
-                _dragRectangle.Height);
-            var visual = this.GetLogicalChildren();
-            foreach (var visualChild in visual)
+            if (_dragRectangle != null)
             {
-                if (visualChild.GetLogicalChildren().First() is BaseNode n)
+                var rect = new Rect(Canvas.GetLeft(_dragRectangle) - OffsetX, Canvas.GetTop(_dragRectangle) - OffsetY,
+                    _dragRectangle.Width,
+                    _dragRectangle.Height);
+                var visual = this.GetLogicalChildren();
+                foreach (var visualChild in visual)
                 {
-                    var nodeRect = new Rect(n.Location, n.Bounds.Size);
-                    if (rect.Intersects(nodeRect))
+                    if (visualChild.GetLogicalChildren().First() is BaseNode n)
                     {
-                        SelectItem(n, true);
+                        var nodeRect = new Rect(n.Location, n.Bounds.Size);
+                        if (rect.Intersects(nodeRect))
+                        {
+                            SelectItem(n, true);
+                        }
                     }
                 }
-            }
 
-            _dragRectangle.IsVisible = false;
+                _dragRectangle.IsVisible = false;
+            }
             _isCreateDragRectangle = false;
         }
 
-        if (!isDragging) return;
+        if (!_isDragging) return;
         // 停止拖动
-        isDragging = false;
+        _isDragging = false;
         e.Handled = true;
         // 停止计时器
-        AutoPanningTimer.Stop();
+        _autoPanningTimer?.Stop();
     }
 
     protected override void OnPointerMoved(PointerEventArgs e)
@@ -551,12 +560,15 @@ public class NodifyEditor : SelectingItemsControl
             var y = Math.Min(point.Y, _dragRectangleStartPoint.Y);
             var w = Math.Abs(point.X - _dragRectangleStartPoint.X);
             var h = Math.Abs(point.Y - _dragRectangleStartPoint.Y);
-            _dragRectangle.SetValue(Canvas.LeftProperty, x);
-            _dragRectangle.SetValue(Canvas.TopProperty, y);
-            _dragRectangle.Width = w;
-            _dragRectangle.Height = h;
-            e.Handled = true;
-            return;
+            if (_dragRectangle != null)
+            {
+                _dragRectangle.SetValue(Canvas.LeftProperty, x);
+                _dragRectangle.SetValue(Canvas.TopProperty, y);
+                _dragRectangle.Width = w;
+                _dragRectangle.Height = h;
+                e.Handled = true;
+                return;
+            }
         }
 
         if (!e.GetCurrentPoint(this).Properties.IsLeftButtonPressed) return;
@@ -566,7 +578,7 @@ public class NodifyEditor : SelectingItemsControl
         }
 
         // 如果没有启动拖动，则不执行
-        if (!isDragging) return;
+        if (!_isDragging) return;
 
         var currentMousePosition = e.GetPosition(this);
         var offset = currentMousePosition - _lastMousePosition;
@@ -608,6 +620,7 @@ public class NodifyEditor : SelectingItemsControl
         Zoom = _nowScale;
         Width = _initWeight / Zoom;
         Height = _initHeight / Zoom;
+        EnsureTransformsInitialized();
         _scaleTransform.ScaleX = Zoom;
         _scaleTransform.ScaleY = Zoom;
         ZoomChanged?.Invoke(this,
@@ -651,9 +664,7 @@ public class NodifyEditor : SelectingItemsControl
         set => SetValue(ConnectionTemplateProperty, value);
     }
 
-    /// <summary>
-    /// Gets or sets the <see cref="DataTemplate"/> to use when generating a new <see cref="DecoratorContainer"/>.
-    /// </summary>
+    
     public IDataTemplate DecoratorTemplate
     {
         get => GetValue(DecoratorTemplateProperty);
@@ -676,12 +687,10 @@ public class NodifyEditor : SelectingItemsControl
     }
 
 
-    /// <summary>
-    /// Gets or sets the style to use for the <see cref="DecoratorContainer"/>.
-    /// </summary>
-    public Style DecoratorContainerStyle
+   
+    public Style? DecoratorContainerStyle
     {
-        get => (Style)GetValue(DecoratorContainerStyleProperty);
+        get => (Style?)GetValue(DecoratorContainerStyleProperty);
         set => SetValue(DecoratorContainerStyleProperty, value);
     }
 
@@ -725,22 +734,14 @@ public class NodifyEditor : SelectingItemsControl
         set => SetValue(ConnectionCompletedCommandProperty, value);
     }
 
-    /// <summary>
-    /// Invoked when the <see cref="Connector.Disconnect"/> event is raised. <br />
-    /// Can also be handled at the <see cref="Connector"/> level using the <see cref="Connector.DisconnectCommand"/> command. <br />
-    /// Parameter is the <see cref="Connector"/>'s <see cref="FrameworkElement.DataContext"/>.
-    /// </summary>
+    
     public ICommand? DisconnectConnectorCommand
     {
         get => (ICommand?)GetValue(DisconnectConnectorCommandProperty);
         set => SetValue(DisconnectConnectorCommandProperty, value);
     }
 
-    /// <summary>
-    /// Invoked when the <see cref="BaseConnection.Disconnect"/> event is raised. <br />
-    /// Can also be handled at the <see cref="BaseConnection"/> level using the <see cref="BaseConnection.DisconnectCommand"/> command. <br />
-    /// Parameter is the <see cref="BaseConnection"/>'s <see cref="FrameworkElement.DataContext"/>.
-    /// </summary>
+    
     public ICommand? RemoveConnectionCommand
     {
         get => (ICommand?)GetValue(RemoveConnectionCommandProperty);
@@ -807,7 +808,7 @@ public class NodifyEditor : SelectingItemsControl
         AvaloniaProperty.Register<NodifyEditor, IDataTemplate>(nameof(AlignmentLineTemplate));
 
     public static readonly StyledProperty<AvaloniaList<object>> AlignmentLineProperty =
-        AvaloniaProperty.Register<NodifyEditor, AvaloniaList<object>>(nameof(AlignmentLine));
+        AvaloniaProperty.Register<NodifyEditor, AvaloniaList<object>>(nameof(AlignmentLine),new AvaloniaList<object>());
 
     public AvaloniaList<object> AlignmentLine
     {
@@ -823,13 +824,13 @@ public class NodifyEditor : SelectingItemsControl
 
     public int AlignmentRange
     {
-        get => (int)GetValue(AlignmentRangeProperty);
+        get => (int)GetValue(AlignmentRangeProperty)!;
         set => SetValue(AlignmentRangeProperty, value);
     }
 
     public bool AllowAlign
     {
-        get => (bool)GetValue(AllowAlignProperty);
+        get => (bool)GetValue(AllowAlignProperty)!;
         set => SetValue(AllowAlignProperty, value);
     }
 
@@ -849,8 +850,13 @@ public class NodifyEditor : SelectingItemsControl
         double nowIntervalY = AlignmentRange;
         var movingNodeWidth = control.Bounds.Width;
         var movingNodeHeight = control.Bounds.Height;
-        if (ItemsPanelRoot?.Children == null) return point;
-        foreach (var child in ItemsPanelRoot?.Children)
+        var children = ItemsPanelRoot?.Children;
+        if (children == null)
+        {
+            return point;
+        }
+
+        foreach (var child in children)
         {
             var node = (BaseNode)child.GetVisualChildren().First();
             if (node == control)
@@ -1046,25 +1052,25 @@ public class NodifyEditor : SelectingItemsControl
 
     public double AutoPanningXEdgeDistance
     {
-        get => (double)GetValue(AutoPanningXEdgeDistanceProperty);
+        get => (double)GetValue(AutoPanningXEdgeDistanceProperty)!;
         set => SetValue(AutoPanningXEdgeDistanceProperty, value);
     }
 
     public double AutoPanningYEdgeDistance
     {
-        get => (double)GetValue(AutoPanningYEdgeDistanceProperty);
+        get => (double)GetValue(AutoPanningYEdgeDistanceProperty)!;
         set => SetValue(AutoPanningYEdgeDistanceProperty, value);
     }
 
     public int AutoPanningSpeed
     {
-        get => (int)GetValue(AutoPanningSpeedProperty);
+        get => (int)GetValue(AutoPanningSpeedProperty)!;
         set => SetValue(AutoPanningSpeedProperty, value);
     }
 
     public bool AllowAutoPanning
     {
-        get => (bool)GetValue(AllowAutoPanningProperty);
+        get => (bool)GetValue(AllowAutoPanningProperty)!;
         set => SetValue(AllowAutoPanningProperty, value);
     }
 
@@ -1079,9 +1085,9 @@ public class NodifyEditor : SelectingItemsControl
         remove => RemoveHandler(NodifyAutoPanningEvent, value);
     }
 
-    DispatcherTimer AutoPanningTimer;
-    NodeLocationEventArgs locationChangedEventArgs;
-    BaseNode baseNode;
+    DispatcherTimer? _autoPanningTimer;
+    private NodeLocationEventArgs? _locationChangedEventArgs;
+    BaseNode? _baseNode;
 
     private void OnNodeLocationChanged(object? sender, NodeLocationEventArgs e)
     {
@@ -1090,54 +1096,60 @@ public class NodifyEditor : SelectingItemsControl
             return;
         }
 
-        baseNode = e.Sender;
-        locationChangedEventArgs = e;
-        if (!AutoPanningTimer.IsEnabled)
+        _baseNode = e.Sender;
+        _locationChangedEventArgs = e;
+        if (_autoPanningTimer != null && !_autoPanningTimer.IsEnabled)
         {
-            AutoPanningTimer.Start();
+            _autoPanningTimer.Start();
         }
     }
 
     private void HandleAutoPanning(object? sender, EventArgs eventArgs)
     {
+        if (_locationChangedEventArgs == null || _baseNode == null)
+        {
+            _autoPanningTimer?.Stop();
+            return;
+        }
+
         var offset = 10 / Zoom;
-        if (OffsetX + locationChangedEventArgs.Location.X < Bounds.Width * AutoPanningXEdgeDistance)
+        if (OffsetX + _locationChangedEventArgs.Location.X < Bounds.Width * AutoPanningXEdgeDistance)
         {
             OffsetX += offset;
             ViewTranslateTransform.X = OffsetX;
-            baseNode.Location += new Point(-offset, 0);
-            locationChangedEventArgs.Location += new Point(-offset, 0);
-            RaiseEvent(new NodifyAutoPanningEventArgs(NodifyAutoPanningEvent, baseNode));
+            _baseNode.Location += new Point(-offset, 0);
+            _locationChangedEventArgs.Location += new Point(-offset, 0);
+            RaiseEvent(new NodifyAutoPanningEventArgs(NodifyAutoPanningEvent, _baseNode));
         }
-        else if (OffsetX + baseNode.Bounds.Width + locationChangedEventArgs.Location.X >
+        else if (OffsetX + _baseNode.Bounds.Width + _locationChangedEventArgs.Location.X >
                  Bounds.Width * (1 - AutoPanningXEdgeDistance))
         {
             OffsetX -= offset;
             ViewTranslateTransform.X = OffsetX;
-            baseNode.Location += new Point(offset, 0);
-            locationChangedEventArgs.Location += new Point(offset, 0);
-            RaiseEvent(new NodifyAutoPanningEventArgs(NodifyAutoPanningEvent, baseNode));
+            _baseNode.Location += new Point(offset, 0);
+            _locationChangedEventArgs.Location += new Point(offset, 0);
+            RaiseEvent(new NodifyAutoPanningEventArgs(NodifyAutoPanningEvent, _baseNode));
         }
-        else if (OffsetY + locationChangedEventArgs.Location.Y < Bounds.Height * AutoPanningYEdgeDistance)
+        else if (OffsetY + _locationChangedEventArgs.Location.Y < Bounds.Height * AutoPanningYEdgeDistance)
         {
             OffsetY += offset;
             ViewTranslateTransform.Y = OffsetY;
-            baseNode.Location += new Point(0, -offset);
-            locationChangedEventArgs.Location += new Point(0, -offset);
-            RaiseEvent(new NodifyAutoPanningEventArgs(NodifyAutoPanningEvent, baseNode));
+            _baseNode.Location += new Point(0, -offset);
+            _locationChangedEventArgs.Location += new Point(0, -offset);
+            RaiseEvent(new NodifyAutoPanningEventArgs(NodifyAutoPanningEvent, _baseNode));
         }
-        else if (OffsetY + baseNode.Bounds.Height + locationChangedEventArgs.Location.Y >
+        else if (OffsetY + _baseNode.Bounds.Height + _locationChangedEventArgs.Location.Y >
                  Bounds.Height * (1 - AutoPanningYEdgeDistance))
         {
             OffsetY -= offset;
             ViewTranslateTransform.Y = OffsetY;
-            baseNode.Location += new Point(0, offset);
-            locationChangedEventArgs.Location += new Point(0, offset);
-            RaiseEvent(new NodifyAutoPanningEventArgs(NodifyAutoPanningEvent, baseNode));
+            _baseNode.Location += new Point(0, offset);
+            _locationChangedEventArgs.Location += new Point(0, offset);
+            RaiseEvent(new NodifyAutoPanningEventArgs(NodifyAutoPanningEvent, _baseNode));
         }
         else
         {
-            AutoPanningTimer.Stop();
+            _autoPanningTimer?.Stop();
         }
     }
 

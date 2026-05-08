@@ -16,10 +16,7 @@ namespace NodifyM.Avalonia.Events
     /// </summary>
     public class ConnectionEventArgs : RoutedEventArgs
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ConnectionEventArgs"/> class using the specified <see cref="Connection"/>.
-        /// </summary>
-        /// <param name="connection">The <see cref="FrameworkElement.DataContext"/> of a related <see cref="BaseConnection"/>.</param>
+       
         public ConnectionEventArgs(object connection)
             => Connection = connection;
 
@@ -28,9 +25,6 @@ namespace NodifyM.Avalonia.Events
         /// </summary>
         public Point SplitLocation { get; set; }
 
-        /// <summary>
-        /// Gets the <see cref="FrameworkElement.DataContext"/> of the <see cref="BaseConnection"/> associated with this event.
-        /// </summary>
         public object Connection { get; }
 
        

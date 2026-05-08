@@ -32,7 +32,7 @@ public class PendingConnection : ContentControl
         /// </summary>
         public Point SourceAnchor
         {
-            get => (Point)GetValue(SourceAnchorProperty);
+            get => GetValue(SourceAnchorProperty);
             set => SetValue(SourceAnchorProperty, value);
         }
 
@@ -41,62 +41,45 @@ public class PendingConnection : ContentControl
         /// </summary>
         public Point TargetAnchor
         {
-            get => (Point)GetValue(TargetAnchorProperty);
+            get => GetValue(TargetAnchorProperty);
             set => SetValue(TargetAnchorProperty, value);
         }
-
-        /// <summary>
-        /// Gets or sets the <see cref="Connector"/>'s <see cref="FrameworkElement.DataContext"/> that started this pending connection.
-        /// </summary>
+        
         public object? Source
         {
             get => GetValue(SourceProperty);
             set => SetValue(SourceProperty, value);
         }
-
-        /// <summary>
-        /// Gets or sets the <see cref="Connector"/>'s <see cref="FrameworkElement.DataContext"/> (or potentially an <see cref="ItemContainer"/>'s <see cref="FrameworkElement.DataContext"/> if <see cref="AllowOnlyConnectors"/> is false) that the <see cref="Source"/> can connect to.
-        /// Only set when the connection is completed (see <see cref="CompletedCommand"/>).
-        /// </summary>
+        
         public object? Target
         {
             get => GetValue(TargetProperty);
             set => SetValue(TargetProperty, value);
         }
-
-        /// <summary>
-        /// <see cref="PreviewTarget"/> will be updated with a potential <see cref="Connector"/>'s <see cref="FrameworkElement.DataContext"/> if this is true.
-        /// </summary>
+        
         public bool EnablePreview
         {
-            get => (bool)GetValue(EnablePreviewProperty);
+            get => (bool)GetValue(EnablePreviewProperty)!;
             set => SetValue(EnablePreviewProperty, value);
         }
 
-        /// <summary>
-        /// Gets or sets the <see cref="Connector"/> or the <see cref="ItemContainer"/> (if <see cref="AllowOnlyConnectors"/> is false) that we're previewing.
-        /// </summary>
+    
         public object? PreviewTarget
         {
             get => GetValue(PreviewTargetProperty);
             set => SetValue(PreviewTargetProperty, value);
         }
 
-        /// <summary>
-        /// Enables snapping the <see cref="TargetAnchor"/> to a possible <see cref="Target"/> connector.
-        /// </summary>
+    
         public bool EnableSnapping
         {
-            get => (bool)GetValue(EnableSnappingProperty);
+            get => (bool)GetValue(EnableSnappingProperty)!;
             set => SetValue(EnableSnappingProperty, value);
         }
-
-        /// <summary>
-        /// If true will preview and connect only to <see cref="Connector"/>s, otherwise will also enable <see cref="ItemContainer"/>s.
-        /// </summary>
+        
         public bool AllowOnlyConnectors
         {
-            get => (bool)GetValue(AllowOnlyConnectorsProperty);
+            get => (bool)GetValue(AllowOnlyConnectorsProperty)!;
             set => SetValue(AllowOnlyConnectorsProperty, value);
         }
 
@@ -105,13 +88,13 @@ public class PendingConnection : ContentControl
         /// </summary>
         public double StrokeThickness
         {
-            get => (double)GetValue(StrokeThicknessProperty);
+            get => (double)GetValue(StrokeThicknessProperty)!;
             set => SetValue(StrokeThicknessProperty, value);
         }
 
-        public AvaloniaList<double> StrokeDashArray
+        public AvaloniaList<double>? StrokeDashArray
         {
-            get => (AvaloniaList<double>)GetValue(StrokeDashArrayProperty);
+            get => (AvaloniaList<double>?)GetValue(StrokeDashArrayProperty);
             set => SetValue(StrokeDashArrayProperty, value);
         }
         
@@ -119,9 +102,9 @@ public class PendingConnection : ContentControl
         /// <summary>
         /// Gets or sets the stroke color of the connection.
         /// </summary>
-        public IBrush Stroke
+        public IBrush? Stroke
         {
-            get => (Brush)GetValue(StrokeProperty);
+            get => (Brush?)GetValue(StrokeProperty);
             set => SetValue(StrokeProperty, value);
         }
         
@@ -131,7 +114,7 @@ public class PendingConnection : ContentControl
         /// </summary>
         public ConnectionDirection Direction
         {
-            get => (ConnectionDirection)GetValue(DirectionProperty);
+            get => (ConnectionDirection)GetValue(DirectionProperty)!;
             set => SetValue(DirectionProperty, value);
         }
 
@@ -139,37 +122,26 @@ public class PendingConnection : ContentControl
         
         public static readonly AvaloniaProperty StartedCommandProperty = AvaloniaProperty.Register<PendingConnection,ICommand>(nameof(StartedCommand));
         public static readonly AvaloniaProperty CompletedCommandProperty = AvaloniaProperty.Register<PendingConnection,ICommand>(nameof(CompletedCommand));
-
-        /// <summary>
-        /// Gets or sets the command to invoke when the pending connection is started.
-        /// Will not be invoked if <see cref="NodifyEditor.ConnectionStartedCommand"/> is used.
-        /// <see cref="Source"/> will be set to the <see cref="Connector"/>'s <see cref="FrameworkElement.DataContext"/> that started this connection and will also be the command's parameter.
-        /// </summary>
+        
         public ICommand? StartedCommand
         {
             get => (ICommand?)GetValue(StartedCommandProperty);
             set => SetValue(StartedCommandProperty, value);
         }
-
-        /// <summary>
-        /// Gets or sets the command to invoke when the pending connection is completed.
-        /// Will not be invoked if <see cref="NodifyEditor.ConnectionCompletedCommand"/> is used.
-        /// <see cref="Target"/> will be set to the desired <see cref="Connector"/>'s <see cref="FrameworkElement.DataContext"/> and will also be the command's parameter.
-        /// </summary>
+        
         public ICommand? CompletedCommand
         {
             get => (ICommand?)GetValue(CompletedCommandProperty);
             set => SetValue(CompletedCommandProperty, value);
         }
         private static readonly AvaloniaProperty AllowOnlyConnectorsAttachedProperty = AvaloniaProperty.RegisterAttached<PendingConnection,bool>("AllowOnlyConnectorsAttached",typeof(PendingConnection),BoxValue.True);
-        /// <summary>
-        /// Will be set for <see cref="Connector"/>s and <see cref="ItemContainer"/>s when the pending connection is over the element if <see cref="EnablePreview"/> or <see cref="EnableSnapping"/> is true.
-        /// </summary>
+        
         public static readonly AvaloniaProperty IsOverElementProperty = AvaloniaProperty.RegisterAttached<PendingConnection,bool>("IsOverElement", typeof(PendingConnection), (BoxValue.False));
 
         internal static bool GetAllowOnlyConnectorsAttached(Control elem)
-            => (bool)elem.GetValue(AllowOnlyConnectorsAttachedProperty);
-        protected NodifyEditor? Editor { get; private set; }
+            => (bool)(elem.GetValue(AllowOnlyConnectorsAttachedProperty) ?? throw new InvalidOperationException());
+
+        private NodifyEditor? Editor { get; set; }
         private Control? _previousConnector;
         protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
         {
@@ -259,7 +231,8 @@ public class PendingConnection : ContentControl
                 e.Handled = true;
                 IsVisible = false;
 
-                if (_previousConnector != null)
+                var previousConnector = _previousConnector;
+                if (previousConnector != null)
                 {
                     //. SetIsOverElement(_previousConnector, false);
                     _previousConnector = null;
@@ -283,7 +256,7 @@ public class PendingConnection : ContentControl
         }
         internal static Control? GetPotentialConnector(NodifyEditor editor, bool allowOnlyConnectors,Point anchor)
         {
-            Connector? connector = editor.ItemsPanelRoot.GetVisualAt<Connector>(anchor);
+            Connector? connector = editor.ItemsPanelRoot!.GetVisualAt<Connector>(anchor);
             
             if (connector != null && connector.Editor == editor)
             {

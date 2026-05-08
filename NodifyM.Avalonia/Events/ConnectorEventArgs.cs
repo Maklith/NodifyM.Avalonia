@@ -16,10 +16,7 @@ namespace NodifyM.Avalonia.Events
     /// </summary>
     public class ConnectorEventArgs : RoutedEventArgs
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ConnectorEventArgs"/> class using the specified <see cref="Connector"/>.
-        /// </summary>
-        /// <param name="connector">The <see cref="FrameworkElement.DataContext"/> of a related <see cref="Avalonia.Controls.Connector"/>.</param>
+        
         public ConnectorEventArgs(object connector)
             => Connector = connector;
 
@@ -27,10 +24,7 @@ namespace NodifyM.Avalonia.Events
         /// Gets or sets the <see cref="Avalonia.Controls.Connector.Anchor"/> of the <see cref="Avalonia.Controls.Connector"/> associated with this event.
         /// </summary>
         public Point Anchor { get; set; }
-
-        /// <summary>
-        /// Gets the <see cref="FrameworkElement.DataContext"/> of the <see cref="Avalonia.Controls.Connector"/> associated with this event.
-        /// </summary>
+        
         public object Connector { get; }
 
         

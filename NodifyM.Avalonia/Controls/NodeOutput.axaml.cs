@@ -10,7 +10,7 @@ public class NodeOutput : Connector
     public static readonly AvaloniaProperty<IDataTemplate> HeaderTemplateProperty = AvaloniaProperty.Register<NodeOutput, IDataTemplate>(nameof(HeaderTemplate));
     public static readonly AvaloniaProperty<ControlTemplate> ConnectorTemplateProperty = AvaloniaProperty.Register<NodeOutput, ControlTemplate>(nameof(ConnectorTemplate));
     
-    public object Header
+    public object? Header
     {
         get => GetValue(HeaderProperty);
         set => SetValue(HeaderProperty, value);
@@ -19,18 +19,18 @@ public class NodeOutput : Connector
     /// <summary>
     /// Gets or sets the template used to display the content of the control's header.
     /// </summary>
-    public DataTemplate HeaderTemplate
+    public DataTemplate? HeaderTemplate
     {
-        get => (DataTemplate)GetValue(HeaderTemplateProperty);
+        get => (DataTemplate?)GetValue(HeaderTemplateProperty);
         set => SetValue(HeaderTemplateProperty, value);
     }
         
     /// <summary>
     /// Gets or sets the template used to display the connecting point of this <see cref="Connector"/>.
     /// </summary>
-    public ControlTemplate ConnectorTemplate
+    public ControlTemplate? ConnectorTemplate
     {
-        get => (ControlTemplate)GetValue(ConnectorTemplateProperty);
+        get => (ControlTemplate?)GetValue(ConnectorTemplateProperty);
         set => SetValue(ConnectorTemplateProperty, value);
     }
 }

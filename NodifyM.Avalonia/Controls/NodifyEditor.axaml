@@ -83,7 +83,7 @@
         </Setter>
         <Setter Property="ItemsPanel">
             <ItemsPanelTemplate>
-                <Canvas x:Name="PART_ItemsHost" Background="{TemplateBinding Background}" Name="NodeItemsPresenter">
+                <Canvas x:Name="PartItemsHost" Background="{TemplateBinding Background}" Name="NodeItemsPresenter">
 
                 </Canvas>
             </ItemsPanelTemplate>

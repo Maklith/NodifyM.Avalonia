@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Styling;
@@ -94,25 +93,12 @@ public partial class MainWindowViewModel : NodifyEditorViewModelBase{
         output1.IsConnected = true;
         input1.IsConnected = true;
     }
-
-    public override void Connect(ConnectorViewModelBase source, ConnectorViewModelBase target)
-    {
-        base.Connect(source, target);
-    }
-
-    public override void DisconnectConnector(ConnectorViewModelBase connector)
-    {
-        base.DisconnectConnector(connector);
-    }
+    
     [RelayCommand]
     private void ChangeTheme()
     {
-        if (Application.Current.ActualThemeVariant==ThemeVariant.Dark)
-        {
-            Application.Current.RequestedThemeVariant = ThemeVariant.Light;
-        }else
-        {
-            Application.Current.RequestedThemeVariant = ThemeVariant.Dark;
+        if (Application.Current != null) {
+            Application.Current.RequestedThemeVariant = Application.Current.ActualThemeVariant==ThemeVariant.Dark ? ThemeVariant.Light : ThemeVariant.Dark;
         }
     }
 }

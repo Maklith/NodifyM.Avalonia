@@ -7,13 +7,13 @@ namespace NodifyM.Avalonia.ViewModelBase;
 public partial class NodifyEditorViewModelBase : ObservableObject
 {
     [ObservableProperty]
-    private ObservableCollection<object?> nodes = new();
+    private ObservableCollection<object?> _nodes = new();
 
     [ObservableProperty]
-    private ObservableCollection<object?> selectedNodes = new();
+    private ObservableCollection<object?> _selectedNodes = new();
 
     [ObservableProperty]
-    private ObservableCollection<ConnectionViewModelBase> connections=new ();
+    private ObservableCollection<ConnectionViewModelBase> _connections=new ();
 
     public PendingConnectionViewModelBase PendingConnection { get; set; }
 
@@ -24,17 +24,17 @@ public partial class NodifyEditorViewModelBase : ObservableObject
     [RelayCommand]
     public virtual void DisconnectConnector(ConnectorViewModelBase connector)
     {
-        var connections = Enumerable.Where<ConnectionViewModelBase>(Connections, e => e.Source == connector || e.Target == connector).ToList();
+        var connections = Connections.Where(e => e.Source == connector || e.Target == connector).ToList();
         for (var i = connections.Count - 1; i >= 0; i--)
         {
             var connection = connections[i];
             Connections.Remove(connection);
-            if (Enumerable.All<ConnectionViewModelBase>(Connections, e => e.Source != connection.Source))
+            if (Connections.All(e => e.Source != connection.Source))
             {
                 connection.Source.IsConnected = false;
             }
 
-            if (Enumerable.All<ConnectionViewModelBase>(Connections, e => e.Target != connection.Target))
+            if (Connections.All(e => e.Target != connection.Target))
             {
                 connection.Target.IsConnected = false;
             }

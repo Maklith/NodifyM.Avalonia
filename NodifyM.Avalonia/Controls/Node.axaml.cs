@@ -32,7 +32,7 @@ public class Node : BaseNode
     public static readonly AvaloniaProperty<IDataTemplate> HeaderTemplateProperty =
         AvaloniaProperty.Register<Node, IDataTemplate>(nameof(HeaderTemplate));
 
-    public static readonly AvaloniaProperty<IDataTemplate> InputConnectorTemplateProperty =
+    public static readonly StyledProperty<IDataTemplate> InputConnectorTemplateProperty =
         AvaloniaProperty.Register<Node, IDataTemplate>(nameof(InputConnectorTemplate));
 
     protected internal static readonly AvaloniaProperty<bool> HasFooterProperty =
@@ -50,43 +50,43 @@ public class Node : BaseNode
     public static readonly AvaloniaProperty<IEnumerable> OutputProperty =
         AvaloniaProperty.Register<Node, IEnumerable>(nameof(Output));
     public static readonly AvaloniaProperty<bool> IsResizeProperty =
-      AvaloniaProperty.Register<Node, bool>(nameof(IsResize),false);
+      AvaloniaProperty.Register<Node, bool>(nameof(IsResize));
 
 
-    public Brush ContentBrush
+    public Brush? ContentBrush
     {
-        get => (Brush)GetValue(ContentBrushProperty);
+        get => (Brush?)GetValue(ContentBrushProperty);
         set => SetValue(ContentBrushProperty, value);
     }
 
     /// <summary>
     /// Gets or sets the brush used for the background of the <see cref="HeaderedContentControl.Header"/> of this <see cref="Node"/>.
     /// </summary>
-    public Brush HeaderBrush
+    public Brush? HeaderBrush
     {
-        get => (Brush)GetValue(HeaderBrushProperty);
+        get => (Brush?)GetValue(HeaderBrushProperty);
         set => SetValue(HeaderBrushProperty, value);
     }
 
     /// <summary>
     /// Gets or sets the brush used for the background of the <see cref="Node.Footer"/> of this <see cref="Node"/>.
     /// </summary>
-    public Brush FooterBrush
+    public Brush? FooterBrush
     {
-        get => (Brush)GetValue(FooterBrushProperty);
+        get => (Brush?)GetValue(FooterBrushProperty);
         set => SetValue(FooterBrushProperty, value);
     }
 
     /// <summary>
     /// Gets or sets the data for the footer of this control.
     /// </summary>
-    public object Footer
+    public object? Footer
     {
         get => GetValue(FooterProperty);
         set => SetValue(FooterProperty, value);
     }
 
-    public object Header
+    public object? Header
     {
         get => GetValue(HeaderProperty);
         set => SetValue(HeaderProperty, value);
@@ -95,15 +95,15 @@ public class Node : BaseNode
     /// <summary>
     /// Gets or sets the template used to display the content of the control's footer.
     /// </summary>
-    public IDataTemplate FooterTemplate
+    public IDataTemplate? FooterTemplate
     {
-        get => (DataTemplate)GetValue(FooterTemplateProperty);
+        get => (DataTemplate?)GetValue(FooterTemplateProperty);
         set => SetValue(FooterTemplateProperty, value);
     }
 
-    public IDataTemplate HeaderTemplate
+    public IDataTemplate? HeaderTemplate
     {
-        get => (DataTemplate)GetValue(HeaderTemplateProperty);
+        get => (DataTemplate?)GetValue(HeaderTemplateProperty);
         set => SetValue(HeaderTemplateProperty, value);
     }
 
@@ -128,18 +128,18 @@ public class Node : BaseNode
     /// <summary>
     /// Gets or sets the data for the input <see cref="Connector"/>s of this control.
     /// </summary>
-    public IEnumerable Input
+    public IEnumerable? Input
     {
-        get => (IEnumerable)GetValue(InputProperty);
+        get => (IEnumerable?)GetValue(InputProperty);
         set => SetValue(InputProperty, value);
     }
 
     /// <summary>
     /// Gets or sets the data for the output <see cref="Connector"/>s of this control.
     /// </summary>
-    public IEnumerable Output
+    public IEnumerable? Output
     {
-        get => (IEnumerable)GetValue(OutputProperty);
+        get => (IEnumerable?)GetValue(OutputProperty);
         set => SetValue(OutputProperty, value);
     }
     /// <summary>
@@ -147,7 +147,7 @@ public class Node : BaseNode
     /// </summary>
     public bool IsResize
     {
-        get => (bool)GetValue(IsResizeProperty);
+        get => (bool)GetValue(IsResizeProperty)!;
         set => SetValue(IsResizeProperty, value);
     }
 
@@ -157,16 +157,13 @@ public class Node : BaseNode
     public bool HasFooter => GetValue(FooterProperty) != null;
 
     public bool HasHeader => GetValue(HeaderProperty) != null;
-
-    public Node()
-    {
-    }
-    private Thumb _topLeft, _topRight, _bottomLeft, _bottomRight;
+    
+    private Thumb? _topLeft, _topRight, _bottomLeft, _bottomRight;
     private Vector _startPoint;
     private Size _startSize;
     private Point _startControlPosition;
     private bool _isDragging;
-    private TranslateTransform _dragTransform;
+    private TranslateTransform _dragTransform= new();
     private Vector _totalDelta; // 记录累计位移
     Vector _lastPoint;
  
@@ -188,22 +185,21 @@ public class Node : BaseNode
         BindThumbEvents(_bottomRight, HandleBottomRightDrag);
 
         // 初始化渲染变换
-        _dragTransform = new TranslateTransform();
         RenderTransform = _dragTransform;
 
     }
 
-    private void BindThumbEvents(Thumb thumb, Action<VectorEventArgs> dragHandler)
+    private void BindThumbEvents(Thumb? thumb, Action<VectorEventArgs> dragHandler)
     {
         if (thumb == null) return;
 
-        thumb.DragStarted += (s, e) => OnDragStarted(s, e);
-        thumb.DragDelta += (s, e) => dragHandler(e);
-        thumb.DragCompleted += (s, e) => OnDragCompleted(s, e);
+        thumb.DragStarted += OnDragStarted;
+        thumb.DragDelta += (_, e) => dragHandler(e);
+        thumb.DragCompleted += OnDragCompleted;
 
 
     }
-    private void OnDragStarted(object sender, VectorEventArgs e)
+    private void OnDragStarted(object? sender, VectorEventArgs e)
     {
         _isDragging = true;
 
@@ -289,7 +285,7 @@ public class Node : BaseNode
 
     }
 
-    private void OnDragCompleted(object sender, VectorEventArgs e)
+    private void OnDragCompleted(object? sender, VectorEventArgs e)
     {
         _isDragging = false;
         _dragTransform.X = 0;

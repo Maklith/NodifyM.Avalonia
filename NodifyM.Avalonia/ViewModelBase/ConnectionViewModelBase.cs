@@ -7,24 +7,25 @@ namespace NodifyM.Avalonia.ViewModelBase;
 
 public partial class ConnectionViewModelBase: ObservableObject
 {
-    [ObservableProperty] public ConnectorViewModelBase source;
-    [ObservableProperty] public ConnectorViewModelBase target;
-    [ObservableProperty] public string text;
+    [ObservableProperty] private ConnectorViewModelBase _source;
+    [ObservableProperty] private ConnectorViewModelBase _target;
+    [ObservableProperty] private string _text;
 
-    private NodifyEditorViewModelBase nodifyEditor
+    private NodifyEditorViewModelBase NodifyEditor
     {
         get;
     }
     
     public ConnectionViewModelBase(NodifyEditorViewModelBase nodifyEditor,ConnectorViewModelBase source, ConnectorViewModelBase target)
     {
-        this.nodifyEditor = nodifyEditor;
+        this.NodifyEditor = nodifyEditor;
         Source = source;
         Target = target;
+        Text = string.Empty;
     }
     public ConnectionViewModelBase(NodifyEditorViewModelBase nodifyEditor,ConnectorViewModelBase source, ConnectorViewModelBase target, string text)
     {
-        this.nodifyEditor = nodifyEditor;
+        this.NodifyEditor = nodifyEditor;
         Source = source;
         Target = target;
         Text = text;
@@ -32,13 +33,13 @@ public partial class ConnectionViewModelBase: ObservableObject
     [RelayCommand]
     public virtual void DisconnectConnection(ConnectionViewModelBase connection)
     {
-        nodifyEditor.Connections.Remove(connection);
-        if (Enumerable.All<ConnectionViewModelBase>(nodifyEditor.Connections, e => (e.Source) != connection.Source&&(e.Target) != connection.Source))
+        NodifyEditor.Connections.Remove(connection);
+        if (NodifyEditor.Connections.All(e => (e.Source) != connection.Source&&(e.Target) != connection.Source))
         {
             connection.Source.IsConnected = false;
         }
 
-        if (Enumerable.All<ConnectionViewModelBase>(nodifyEditor.Connections, e => (e.Target != connection.Target)&&(e.Source != connection.Target)))
+        if (NodifyEditor.Connections.All(e => (e.Target != connection.Target)&&(e.Source != connection.Target)))
         {
             connection.Target.IsConnected = false;
         }
@@ -52,11 +53,11 @@ public partial class ConnectionViewModelBase: ObservableObject
             Location = location,
             Connector = new ConnectorViewModelBase()
         };
-        nodifyEditor.Nodes.Add(knot);
+        NodifyEditor.Nodes.Add(knot);
 
-        nodifyEditor.Connect(Source, knot.Connector);
-        nodifyEditor.Connect(knot.Connector, this.Target);
+        NodifyEditor.Connect(Source, knot.Connector);
+        NodifyEditor.Connect(knot.Connector, this.Target);
 
-        nodifyEditor.Connections.Remove(this);
+        NodifyEditor.Connections.Remove(this);
     }
 }

@@ -22,8 +22,8 @@ public abstract class BaseConnectionShape : Control
     /// <summary>
     /// Defines the <see cref="Stretch"/> property.
     /// </summary>
-    public static readonly StyledProperty<global::Avalonia.Media.Stretch> StretchProperty =
-        AvaloniaProperty.Register<BaseConnectionShape, global::Avalonia.Media.Stretch>(nameof(Stretch));
+    public static readonly StyledProperty<Stretch> StretchProperty =
+        AvaloniaProperty.Register<BaseConnectionShape, Stretch>(nameof(Stretch));
 
     /// <summary>
     /// Defines the <see cref="Stroke"/> property.
@@ -53,7 +53,7 @@ public abstract class BaseConnectionShape : Control
     /// Defines the <see cref="StrokeLineCap"/> property.
     /// </summary>
     public static readonly StyledProperty<PenLineCap> StrokeLineCapProperty =
-        AvaloniaProperty.Register<BaseConnectionShape, PenLineCap>(nameof(StrokeLineCap), PenLineCap.Flat);
+        AvaloniaProperty.Register<BaseConnectionShape, PenLineCap>(nameof(StrokeLineCap));
 
     /// <summary>
     /// Defines the <see cref="StrokeJoin"/> property.
@@ -183,7 +183,7 @@ public abstract class BaseConnectionShape : Control
     /// <summary>
     /// Gets or sets a <see cref="Stretch"/> enumeration value that describes how the shape fills its allocated space.
     /// </summary>
-    public global::Avalonia.Media.Stretch Stretch
+    public Stretch Stretch
     {
         get => GetValue(StretchProperty);
         set => SetValue(StretchProperty, value);
@@ -357,7 +357,7 @@ public abstract class BaseConnectionShape : Control
         return default;
     }
 
-    internal static (Size size, Matrix transform) CalculateSizeAndTransform(Size availableSize, Rect shapeBounds, global::Avalonia.Media.Stretch Stretch)
+    internal static (Size size, Matrix transform) CalculateSizeAndTransform(Size availableSize, Rect shapeBounds, Stretch stretch)
     {
         Size shapeSize = new Size(shapeBounds.Right, shapeBounds.Bottom);
         Matrix translate = Matrix.Identity;
@@ -366,7 +366,7 @@ public abstract class BaseConnectionShape : Control
         double sx = 0.0;
         double sy = 0.0;
 
-        if (Stretch != Stretch.None)
+        if (stretch != Stretch.None)
         {
             shapeSize = shapeBounds.Size;
             translate = Matrix.CreateTranslation(-(Vector)shapeBounds.Position);
@@ -402,7 +402,7 @@ public abstract class BaseConnectionShape : Control
             sy = sx;
         }
 
-        switch (Stretch)
+        switch (stretch)
         {
             case Stretch.Uniform:
                 sx = sy = Math.Min(sx, sy);

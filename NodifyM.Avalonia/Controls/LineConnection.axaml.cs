@@ -37,7 +37,7 @@ public class LineConnection : BaseConnection
             var from = new Point(target.X + (headWidth * cosT - headHeight * sinT), target.Y + (headWidth * sinT + headHeight * cosT));
             var to = new Point(target.X + (headWidth * cosT + headHeight * sinT), target.Y - (headHeight * cosT - headWidth * sinT));
 
-            context.BeginFigure(target, true);
+            context.BeginFigure(target);
             context.LineTo(from);
             context.LineTo(to);
         }

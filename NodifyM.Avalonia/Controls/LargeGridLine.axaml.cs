@@ -7,11 +7,11 @@ namespace NodifyM.Avalonia.Controls;
 
 public class LargeGridLine : TemplatedControl
 {
-    public static readonly AvaloniaProperty<double> OffsetXProperty =
-        AvaloniaProperty.Register<LargeGridLine, double>(nameof(OffsetX));
+    public static readonly AvaloniaProperty<double?> OffsetXProperty =
+        AvaloniaProperty.Register<LargeGridLine, double?>(nameof(OffsetX));
 
-    public static readonly AvaloniaProperty<double> OffsetYProperty =
-        AvaloniaProperty.Register<LargeGridLine, double>(nameof(OffsetY));
+    public static readonly AvaloniaProperty<double?> OffsetYProperty =
+        AvaloniaProperty.Register<LargeGridLine, double?>(nameof(OffsetY));
 
     public static readonly AvaloniaProperty<double> ZoomProperty =
         AvaloniaProperty.Register<LargeGridLine, double>(nameof(Zoom));
@@ -27,41 +27,41 @@ public class LargeGridLine : TemplatedControl
 
     public double Spacing
     {
-        get { return (double)GetValue(SpacingProperty); }
-        set { SetValue(SpacingProperty, value); }
+        get => (double)GetValue(SpacingProperty)!;
+        set => SetValue(SpacingProperty, value);
     }
 
     public IBrush Brush
     {
-        get { return (IBrush)GetValue(BrushProperty); }
-        set { SetValue(BrushProperty, value); }
+        get => (IBrush)GetValue(BrushProperty)!;
+        set => SetValue(BrushProperty, value);
     }
 
     public double Thickness
     {
-        get { return (double)GetValue(ThicknessProperty); }
-        set { SetValue(ThicknessProperty, value); }
+        get => (double)GetValue(ThicknessProperty)!;
+        set => SetValue(ThicknessProperty, value);
     }
 
-    public double OffsetX
+    public double? OffsetX
     {
-        get { return (double)GetValue(OffsetXProperty); }
-        set { SetValue(OffsetXProperty, value); }
+        get => (double?)GetValue(OffsetXProperty);
+        set => SetValue(OffsetXProperty, value);
     }
 
-    public double OffsetY
+    public double? OffsetY
     {
-        get { return (double)GetValue(OffsetYProperty); }
-        set { SetValue(OffsetYProperty, value); }
+        get => (double?)GetValue(OffsetYProperty);
+        set => SetValue(OffsetYProperty, value);
     }
 
-    public double Zoom
+    public double? Zoom
     {
-        get { return (double)GetValue(ZoomProperty); }
-        set { SetValue(ZoomProperty, value); }
+        get => (double?)GetValue(ZoomProperty);
+        set => SetValue(ZoomProperty, value);
     }
 
-    public List<IDisposable> Disposables { get; } = new List<IDisposable>();
+    public List<IDisposable> Disposables { get; } = new();
 
     protected override void OnInitialized()
     {
@@ -79,19 +79,22 @@ public class LargeGridLine : TemplatedControl
     public override void Render(DrawingContext context)
     {
         base.Render(context);
+        if (!OffsetX.HasValue || !OffsetY.HasValue|| !Zoom.HasValue) {
+            return;
+        }
         var pen = new Pen(Brush, Thickness);
         double step = Spacing;
         // Draw horizontal lines
-        var offsetY = Math.Abs(OffsetY / Zoom);
-        var offsetX = Math.Abs(OffsetX / Zoom);
-        for (double y = OffsetY % step; y < this.Bounds.Height; y += step)
+        var offsetY = Math.Abs(OffsetY.Value / Zoom.Value);
+        var offsetX = Math.Abs(OffsetX.Value/ Zoom.Value);
+        for (double y = OffsetY.Value % step; y < this.Bounds.Height; y += step)
         {
             context.DrawLine(pen, new Point(-offsetX, y), new Point(this.Bounds.Width, y));
         }
 
         // Draw vertical lines
 
-        for (double x = OffsetX % step; x < this.Bounds.Width; x += step)
+        for (double x = OffsetX.Value % step; x < this.Bounds.Width; x += step)
         {
             context.DrawLine(pen, new Point(x, -offsetY), new Point(x, this.Bounds.Height));
         }

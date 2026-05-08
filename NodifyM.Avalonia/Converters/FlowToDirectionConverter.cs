@@ -7,15 +7,15 @@ namespace NodifyM.Avalonia.Converters
 {
     public class FlowToDirectionConverter : IValueConverter
     {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
         {
             if (value is ConnectionViewModelBase connectionViewModelBase)
             {
-                if (connectionViewModelBase.source.Flow is ConnectorViewModelBase.ConnectorFlow.Input )
+                if (connectionViewModelBase.Source.Flow is ConnectorViewModelBase.ConnectorFlow.Input )
                 {
                     return ConnectionDirection.Backward;
                 }
-                if (connectionViewModelBase.target.Flow is ConnectorViewModelBase.ConnectorFlow.Input)
+                if (connectionViewModelBase.Target.Flow is ConnectorViewModelBase.ConnectorFlow.Input)
                 {
                     return ConnectionDirection.Forward;
                 }
@@ -27,7 +27,7 @@ namespace NodifyM.Avalonia.Converters
             return value;
         }
 
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
         {
             if (value is ConnectionDirection dir)
             {

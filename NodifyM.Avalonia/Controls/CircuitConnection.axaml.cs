@@ -15,7 +15,7 @@ public class CircuitConnection : LineConnection
         /// </summary>
         public double Angle
         {
-            get => (double)GetValue(AngleProperty);
+            get => (double)GetValue(AngleProperty)!;
             set => SetValue(AngleProperty, value);
         }
         

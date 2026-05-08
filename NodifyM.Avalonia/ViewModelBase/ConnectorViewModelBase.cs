@@ -14,7 +14,7 @@ public partial class ConnectorViewModelBase : ObservableObject
     private Point _anchor;
     
     [ObservableProperty]
-    private string _title;
+    private string _title="";
     [ObservableProperty]
     private bool _isConnected;
     [ObservableProperty]

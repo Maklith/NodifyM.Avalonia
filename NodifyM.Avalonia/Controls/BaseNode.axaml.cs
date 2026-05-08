@@ -26,24 +26,10 @@ public class BaseNode : ContentControl
 
 
     private NodifyEditor? _editor;
-
-
-    private double _startOffsetX;
-    private double _startOffsetY;
-
-    /// <summary>
-    /// 标记是否先启动了拖动
-    /// </summary>
-    private bool isDragging = false;
-
-    /// <summary>
-    /// 记录上一次鼠标位置
-    /// </summary>
-    private Point lastMousePosition;
-
+    
     public bool IsSelected
     {
-        get => (bool)GetValue(IsSelectedProperty);
+        get => (bool)GetValue(IsSelectedProperty)!;
         set
         {
             SetValue(IsSelectedProperty, value);
@@ -53,7 +39,7 @@ public class BaseNode : ContentControl
 
     public Point Location
     {
-        get => (Point)GetValue(LocationProperty);
+        get => (Point)GetValue(LocationProperty)!;
         set
         {
             SetValue(LocationProperty, value);

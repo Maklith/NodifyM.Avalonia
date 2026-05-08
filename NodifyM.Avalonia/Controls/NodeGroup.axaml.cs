@@ -7,7 +7,6 @@
 
 using Avalonia;
 using Avalonia.Media;
-using NodifyM.Avalonia.Events;
 
 namespace NodifyM.Avalonia.Controls;
 
@@ -49,10 +48,5 @@ public class NodeGroup : BaseNode
     {
         get => GetValue(SizeProperty);
         set => SetValue(SizeProperty, value);
-    }
-
-    protected override void OnSelectChanged(NodeSelectEventArgs e)
-    {
-        base.OnSelectChanged(e);
     }
 }

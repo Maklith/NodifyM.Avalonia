@@ -1,7 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
-using Avalonia.Interactivity;
 using Avalonia.Media;
 using Avalonia.VisualTree;
 using NodifyM.Avalonia.Events;
@@ -56,7 +55,7 @@ public class NodifyEditorMinimap : Control
         {
             if (args.Sender is NodifyEditorMinimap minimap)
             {
-                minimap.AttachEditor(args.NewValue.Value as NodifyEditor);
+                minimap.AttachEditor(args.NewValue.Value);
             }
         });
     }
@@ -170,7 +169,7 @@ public class NodifyEditorMinimap : Control
 
         var mapRect = new Rect(0, 0, Bounds.Width, Bounds.Height);
         context.FillRectangle(MapBackground, mapRect);
-        context.DrawRectangle(null, new Pen(MapBorderBrush, 1), mapRect.Deflate(0.5d));
+        context.DrawRectangle(null, new Pen(MapBorderBrush), mapRect.Deflate(0.5d));
 
         foreach (var node in GetVisibleNodes(Editor!))
         {
@@ -182,7 +181,7 @@ public class NodifyEditorMinimap : Control
             }
 
             context.FillRectangle(NodeBrush, mappedRect);
-            context.DrawRectangle(null, new Pen(NodeBorderBrush, 1), mappedRect.Deflate(0.5d));
+            context.DrawRectangle(null, new Pen(NodeBorderBrush), mappedRect.Deflate(0.5d));
         }
 
         var viewportWorld = GetViewportWorldRect(Editor!);

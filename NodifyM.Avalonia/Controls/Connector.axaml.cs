@@ -14,11 +14,6 @@ public class Connector : ContentControl
 {
     protected const string ElementConnector = "PART_Connector";
 
-    /// <summary>
-    /// Gets the <see cref="NodifyEditor"/> that owns this <see cref="Container"/>.
-    /// </summary>
-    private Point _lastUpdatedContainerPosition;
-
     private Point _thumbCenter;
 
     static Connector()
@@ -28,14 +23,14 @@ public class Connector : ContentControl
     }
 
     protected internal NodifyEditor? Editor { get; private set; }
-    protected Control? Thumb { get; private set; }
-    protected BaseNode? Container { get; private set; }
-    public static bool AllowPendingConnectionCancellation { get; set; } = true;
+    private Control Thumb { get; set; } = null!;
+    private BaseNode Container { get; set; } = null!;
+    private static bool AllowPendingConnectionCancellation { get; set; } = true;
 
     /// <summary>
     /// Gets or sets whether the connection should be completed in two steps.
     /// </summary>
-    public static bool EnableStickyConnections { get; set; }
+    public static bool EnableStickyConnections => false;
 
     private void OnConnectorLoaded()
         => TrySetAnchorUpdateEvents(true);
@@ -45,7 +40,7 @@ public class Connector : ContentControl
 
     private void TrySetAnchorUpdateEvents(bool value)
     {
-        if (Container != null && Editor != null)
+        if (Editor != null)
         {
             // If events are not already hooked and we are asked to subscribe
             if (value)
@@ -62,43 +57,34 @@ public class Connector : ContentControl
         }
     }
 
-    private void OnContainerSizeChanged(object sender, SizeChangedEventArgs e)
-        => UpdateAnchor(Container!.Location);
+    private void OnContainerSizeChanged(object? sender, SizeChangedEventArgs e)
+        => UpdateAnchor(Container.Location);
 
-    private void OnLocationChanged(object sender, RoutedEventArgs e)
-        => UpdateAnchor(Container!.Location);
+    private void OnLocationChanged(object? sender, RoutedEventArgs e)
+        => UpdateAnchor(Container.Location);
 
-    public void UpdateAnchor()
-    {
-        if (Container != null)
-        {
-            UpdateAnchor(Container.Location);
-        }
+    public void UpdateAnchor() {
+        UpdateAnchor(Container.Location);
     }
 
     /// <summary>
-    /// Updates the <see cref="Anchor"/> and applies optimizations if needed based on <see cref="EnableOptimizations"/> flag
+    /// Updates the <see cref="Anchor"/> 
     /// </summary>
     /// <param name="location"></param>
-    protected void UpdateAnchor(Point location)
-    {
-        _lastUpdatedContainerPosition = location;
-        if (Container != null)
-        {
-            Size containerMargin = (Size)Container.Bounds.Size - (Size)Container.DesiredSize;
-            Point relativeLocation = Thumb.TranslatePoint(new Point((Thumb.Bounds.Width - containerMargin.Width) / 2,
-                (Thumb.Bounds.Height - containerMargin.Height) / 2), Container)!.Value;
-            Anchor = new Point(location.X + relativeLocation.X, location.Y + relativeLocation.Y);
-        }
+    protected void UpdateAnchor(Point location) {
+        Size containerMargin = Container.Bounds.Size - Container.DesiredSize;
+        Point relativeLocation = Thumb.TranslatePoint(new Point((Thumb.Bounds.Width - containerMargin.Width) / 2,
+            (Thumb.Bounds.Height - containerMargin.Height) / 2), Container)!.Value;
+        Anchor = new Point(location.X + relativeLocation.X, location.Y + relativeLocation.Y);
     }
 
     protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
     {
         base.OnApplyTemplate(e);
-        Container = this.GetParentOfType<BaseNode>();
+        Container = this.GetParentOfType<BaseNode>() ?? throw new InvalidOperationException("Connector must be placed inside a BaseNode.");
 
         Editor = this.GetParentOfType<NodifyEditor>();
-        Thumb = this.GetChildOfType<Control>("PART_Connector");
+        Thumb = this.GetChildOfType<Control>("PART_Connector")?? throw new InvalidOperationException("PART_Connector not found in template.");
     }
 
     protected override void OnPointerPressed(PointerPressedEventArgs e)
@@ -211,11 +197,12 @@ public class Connector : ContentControl
         OnConnectorDragCompleted(cancel: true);
     }
 
-    protected virtual void OnDisconnect()
+    protected void OnDisconnect()
     {
         if (IsConnected && !IsPendingConnection)
         {
             object? connector = DataContext;
+            if (connector == null) return;
             var args = new ConnectorEventArgs(connector)
             {
                 RoutedEvent = DisconnectEvent,
@@ -233,8 +220,8 @@ public class Connector : ContentControl
         }
     }
 
-    protected virtual void OnConnectorDrag(Vector offset)
-    {
+    protected virtual void OnConnectorDrag(Vector offset) {
+        if (DataContext == null) return;
         var args = new PendingConnectionEventArgs(DataContext)
         {
             RoutedEvent = PendingConnectionDragEvent,
@@ -249,11 +236,9 @@ public class Connector : ContentControl
 
     protected virtual void OnConnectorDragStarted()
     {
-        if (Thumb != null)
-        {
-            _thumbCenter = new Point(Thumb.Bounds.Width / 2, Thumb.Bounds.Height / 2);
-        }
+        _thumbCenter = new Point(Thumb.Bounds.Width / 2, Thumb.Bounds.Height / 2);
 
+        if (DataContext == null) return;
         var args = new PendingConnectionEventArgs(DataContext)
         {
             RoutedEvent = PendingConnectionStartedEvent,
@@ -274,6 +259,7 @@ public class Connector : ContentControl
                     PendingConnection.GetAllowOnlyConnectorsAttached(Editor), point.Value)
                 : null;
 
+            if (DataContext == null) return;
             var args = new PendingConnectionEventArgs(DataContext)
             {
                 TargetConnector = elem?.DataContext,
@@ -319,14 +305,14 @@ public class Connector : ContentControl
         RoutedEvent.Register<Connector, PendingConnectionEventArgs>(nameof(Disconnect), RoutingStrategies.Bubble);
 
 
-    /// <summary>Triggered by the <see cref="Connector.Connect"/> gesture.</summary>
+    
     public event PendingConnectionEventHandler PendingConnectionStarted
     {
         add => AddHandler(PendingConnectionStartedEvent, value);
         remove => RemoveHandler(PendingConnectionStartedEvent, value);
     }
 
-    /// <summary>Triggered by the <see cref="Connector.Connect"/> gesture.</summary>
+    
     public event PendingConnectionEventHandler PendingConnectionCompleted
     {
         add => AddHandler(PendingConnectionCompletedEvent, value);
@@ -372,7 +358,7 @@ public class Connector : ContentControl
     /// </summary>
     public Point Anchor
     {
-        get => (Point)GetValue(AnchorProperty);
+        get => GetValue(AnchorProperty);
         set => SetValue(AnchorProperty, value);
     }
 
@@ -381,7 +367,7 @@ public class Connector : ContentControl
     /// </summary>
     public bool IsConnected
     {
-        get => (bool)GetValue(IsConnectedProperty);
+        get => GetValue(IsConnectedProperty);
         set => SetValue(IsConnectedProperty, value);
     }
 
@@ -390,14 +376,10 @@ public class Connector : ContentControl
     /// </summary>
     public bool IsPendingConnection
     {
-        get => (bool)GetValue(IsPendingConnectionProperty);
+        get => (bool)GetValue(IsPendingConnectionProperty)!;
         protected set => SetValue(IsPendingConnectionProperty, value);
     }
-
-    /// <summary>
-    /// Invoked if the <see cref="Disconnect"/> event is not handled.
-    /// Parameter is the <see cref="FrameworkElement.DataContext"/> of this control.
-    /// </summary>
+    
     public ICommand? DisconnectCommand
     {
         get => (ICommand?)GetValue(DisconnectCommandProperty);
