@@ -49,16 +49,28 @@ This project is a refactoring of [Nodify](https://github.com/miroiu/nodify) on t
  - Hold `Alt` and `Click` Connector -> Remove all the Connections on the Connector
 
 ## Notice
-1. ViewModelBase is for reference only, you don't need to use it, there are binding methods in Example's AXAML code.
+1. `BaseNodeViewModel` is provided as a reference only. You do not need to use it.
+2. For binding examples, see the AXAML files in `NodifyM.Avalonia.Example` or [Another Example which without `BaseNodeViewModel`](https://github.com/Maklith/Kitopia/blob/c7a1be3ee147befa9059e0a6d9e4e6915d1af9fd/KitopiaAvalonia/Windows/TaskEditors/TaskEditor.axaml#L351).
+3. To support node positioning, implement the `INodePosition` interface in your view model.
+
+
+| Avalonia version | NodifyM.Avalonia version | Note |
+|---|--------------------------|---|
+| Avalonia 11 | <= 1.1.9                 | Use 1.1.9 or earlier |
+| Avalonia 12 | \>= 12.0.0               | Recommended: latest stable |
+
 
 ### Some known problems
-1. Do not use `Mode=OneWayToSource` when you have multiple Nodify bound to the same ViewModel, this is a bug from [Avalonia](https://github.com/AvaloniaUI/Avalonia/issues/4438)
+1. Do not use `Mode=OneWayToSource` when multiple Nodify controls are bound to the same view model. This is caused by an Avalonia issue: [#4438](https://github.com/AvaloniaUI/Avalonia/issues/4438).
 
 ## Example
 #### please see the [NodifyM.Avalonia.Example](https://github.com/MakesYT/NodifyM.Avalonia/tree/master/NodifyM.Avalonia.Example)
 #### You can git clone the project and run `NodifyM.Avalonia.Example`
 
 ## Changelog
+
+### 12.0.0
+- decouple editor node positioning style from BaseNodeViewModel for AOT-safe bindings
 
 ### 1.3.0
 - Now is AotCompatible
