@@ -112,7 +112,7 @@
         </Setter>
         <Setter Property="Cursor" Value="Hand" />
     </Style>
-    <Style Selector="controls|NodifyEditor > ContentPresenter" x:DataType="viewModelBase:BaseNodeViewModel">
+    <Style Selector="controls|NodifyEditor > ContentPresenter" x:DataType="viewModelBase:INodePosition">
 
         <Setter Property="Canvas.Left" Value="{Binding Location.X}" />
         <Setter Property="Canvas.Top" Value="{Binding Location.Y}" />
